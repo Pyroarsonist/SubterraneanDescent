@@ -9,25 +9,32 @@ import android.view.SurfaceView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Random;
 
-/**
- * Created by A8 on 2/6/2017.
- */
 
 class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     private DrawThread drawThread;
+    private int level;
+    private int heroHP;
+    private int initMaxHeroHP;
 
-    private double initX, initY;
     private double targetX, targetY;
 
     private Square[][] squares;
-   /* public ArrayList<Creature> creatures = new ArrayList<>();
-    public Creature heroC;*/
+    private ArrayList<Integer> identities = new ArrayList<>();
+    public ArrayList<Integer> valueX = new ArrayList<>();//squares
+    public ArrayList<Integer> valueY = new ArrayList<>();
+    private int numSqH = 9;
+    private int numSqW = 7;
+    private boolean[][] availableToGenerate = new boolean[numSqH][numSqW];
 
 
-    public DrawView(Context context) {
+    public DrawView(Context context, int level, int heroHP, int initMaxHeroHP) {
         super(context);
+        this.level = level;
+        this.heroHP = heroHP;
+        this.initMaxHeroHP = initMaxHeroHP;
         getHolder().addCallback(this);
     }
 
@@ -39,11 +46,42 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        drawThread = new DrawThread(getHolder(), getContext());
+        initCreature(0, -1, -1);
+        generateMap(level);
+        drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY);
         squares = drawThread.getSquares();
         drawThread.setRunning(true);
         drawThread.start();
     }
+
+    private void initCreature(int identity, int x, int y) {
+        identities.add(identity);
+        valueX.add(x);
+        valueY.add(y);
+    }
+
+    private void generateMap(int level) {
+        Random rn = new Random();
+        for (int i = 1; i < numSqH - 3; i++) {
+            for (int j = 1; j < numSqW - 2; j++) {
+                availableToGenerate[i][j] = true;
+            }
+        }
+        switch (level) {
+            case 1: {
+                for (int i = 0; i < 2; i++) {
+                    int cX = rn.nextInt(numSqW);
+                    int cY = rn.nextInt(numSqH);
+                    if (availableToGenerate[cY][cX]) {
+                        initCreature(1, cY, cX);
+                        availableToGenerate[cY][cX] = false;
+                    } else {
+                        i--;
+                    }
+                }
+            }
+        }
+    } //TODO generate
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -97,11 +135,27 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             end();
         }*/
         if (!drawThread.isAlive())
-            end();
+            end(drawThread.getAllEnemiesDead());
     }
 
-    public void end() {
+    public void end(boolean allEnemiesDead) {
+        boolean won = allEnemiesDead;
+        if (won) {
+            Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_LONG).show();
+          /*  try {
+                Thread.sleep(Toast.LENGTH_SHORT);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }*/
+        } else {
+            Toast.makeText(this.getContext(), "You lost...", Toast.LENGTH_LONG).show();
+          /*  try {
+                Thread.sleep(Toast.LENGTH_SHORT);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }*/
+        }
         LevelActivity myActivity = (LevelActivity) getContext();
         myActivity.finish();
-    }
+    } //TODO giving the HP back
 }

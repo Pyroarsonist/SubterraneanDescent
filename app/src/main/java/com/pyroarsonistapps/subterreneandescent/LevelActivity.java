@@ -2,14 +2,25 @@ package com.pyroarsonistapps.subterreneandescent;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 
 
 public class LevelActivity extends Activity {
+    private int level;
+    private int heroHP;
+    private int initMaxHeroHP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(new DrawView(this));
+        initFromIntent();
+        setContentView(new DrawView(this, level, heroHP, initMaxHeroHP));
+    }
+
+    private void initFromIntent() {
+        level = getIntent().getIntExtra("level", 1);
+        heroHP = getIntent().getIntExtra("heroHP", 0);
+        initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", 0);
     }
 
 }

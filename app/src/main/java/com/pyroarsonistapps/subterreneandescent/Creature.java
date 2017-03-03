@@ -5,7 +5,7 @@ abstract class Creature {
     int HP;
     int currentHP;
 
-    int x;
+    int x; //on squares
     int y;
 
     int vector = 4;
@@ -13,6 +13,11 @@ abstract class Creature {
     int[] lastY = new int[9];
 
     boolean isAlive = true;
+
+    Creature(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
 
     int getCurrentHP() {
         return currentHP;

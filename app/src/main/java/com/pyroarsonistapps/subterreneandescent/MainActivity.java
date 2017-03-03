@@ -8,6 +8,9 @@ import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends Activity {
+    private int level = 1;
+    private int heroHP;
+    private int initMaxHeroHP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,7 +21,9 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);
-                // myIntent.putExtra("key", value); //Optional parameters
+                myIntent.putExtra("level", level);
+                myIntent.putExtra("heroHP", heroHP);
+                myIntent.putExtra("initMaxHeroHP", initMaxHeroHP);
                 MainActivity.this.startActivity(myIntent);
             }
         });

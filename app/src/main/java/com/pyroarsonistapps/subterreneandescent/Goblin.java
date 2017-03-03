@@ -6,10 +6,9 @@ package com.pyroarsonistapps.subterreneandescent;
 
 public class Goblin extends Creature {
     Goblin(int x, int y) {
+        super(x,y);
         identity = 1;
         HP = 1;
-        this.x = x;
-        this.y = y;
         currentHP = HP;
     }
 }

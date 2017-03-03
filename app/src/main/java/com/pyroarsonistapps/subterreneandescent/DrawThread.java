@@ -15,11 +15,13 @@ import java.util.ArrayList;
 
 class DrawThread extends Thread {
 
-    private Bitmap square, suggestingSquare, hero, goblin;
+    private Bitmap square, suggestingSquare, hero, goblin, stairs;
     private Context context;
     private int numSqH = 9;
     private int numSqW = 7;
     private Square[][] squares = new Square[numSqH][numSqW]; // [0][0],[0][1]...
+
+    private boolean allEnemiesDead = false;
 
     private boolean running = false;
 
@@ -30,10 +32,8 @@ class DrawThread extends Thread {
     // hero's x and y == squares x and y
     private int initHeroX = (numSqW - 1) / 2;
     private int initHeroY = numSqH - 1;
-
-    private int goblinX = 2;
-    private int goblinY = 3;
-
+    private int initHeroHP;
+    private int initMaxHeroHP;
 
     private int paintingSuggestingMoveSquareX = initHeroX;
     private int paintingSuggestingMoveSquareY = initHeroY;
@@ -41,8 +41,6 @@ class DrawThread extends Thread {
     private SurfaceHolder surfaceHolder;
 
     private int possibleMovement = 1;
-
-    //hero = creatures.get(0);
     private ArrayList<Creature> creatures = new ArrayList<>();
 
     private int canvasW;
@@ -52,21 +50,30 @@ class DrawThread extends Thread {
 
     private Creature heroC;
 
-    private void init() {
-        creatures.add(new Hero(initHeroX, initHeroY));
-        creatures.add(new Goblin(goblinX, goblinY));
-        creatures.add(new Goblin(goblinX, goblinY + 2));
+    private void init(ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
+        if (initHeroHP == 0 & initMaxHeroHP == 0)
+            creatures.add(new Hero(initHeroX, initHeroY));
+        else
+            creatures.add(new Hero(initHeroX, initHeroY, initHeroHP, initMaxHeroHP));
+        for (int i = 1; i < identities.size(); i++) {
+            if (identities.get(i) == 1)
+                creatures.add(new Goblin(valueX.get(i), valueY.get(i)));
+        }
         heroC = creatures.get(0);
+        Log.i("dan", heroC.getCurrentHP() + " HP!");
         square = BitmapFactory.decodeResource(context.getResources(), R.drawable.square);
         suggestingSquare = BitmapFactory.decodeResource(context.getResources(), R.drawable.testsq);  //TODO
         hero = BitmapFactory.decodeResource(context.getResources(), R.drawable.herox);
         goblin = BitmapFactory.decodeResource(context.getResources(), R.drawable.goblin);
+        stairs = BitmapFactory.decodeResource(context.getResources(), R.drawable.stairs);
     }
 
-    DrawThread(SurfaceHolder surfaceHolder, Context c) {
+    DrawThread(SurfaceHolder surfaceHolder, Context c, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
         this.surfaceHolder = surfaceHolder;
+        initHeroHP = HeroHP;
+        this.initMaxHeroHP = initMaxHeroHP;
         context = c;
-        init();
+        init(identities, valueX, valueY);
     }
 
     void setPaintSuggestingMoveSquare(boolean painting) {
@@ -82,6 +89,12 @@ class DrawThread extends Thread {
         this.repaint = repainting;
     }
 
+    public void setAllEnemiesDead(boolean allEnemiesDead) {
+        if (!allEnemiesDead)
+            Toast.makeText(context, "Now descent on stairs to continue", Toast.LENGTH_SHORT).show(); //TODO opening stairs
+        this.allEnemiesDead = allEnemiesDead;
+    }
+
     @Override
     public void run() {
         Canvas canvas;
@@ -95,11 +108,11 @@ class DrawThread extends Thread {
                     setCanvasProps(canvas);
                     setSquareMap(canvas);
                     putSquareMap(canvas);
+                    stairsPainting(canvas);
                     heroPaint(canvas);
                     enemyPaint(canvas);
                     suggestMove(canvas);
-                    HPpainting(canvas);
-
+                    HPPainting(canvas);
 
                     //ending of painting
                 } finally {
@@ -113,7 +126,31 @@ class DrawThread extends Thread {
 
     }
 
-    private void HPpainting(Canvas canvas) {
+    private void stairsPainting(Canvas canvas) {
+        if (allEnemiesDead) {
+            int stairsX = (numSqW - 1) / 2;
+            int stairsY = 1;
+            float currX = squares[stairsY][stairsX].getX();
+            float currY = squares[stairsY][stairsX].getY();
+            canvas.drawBitmap(stairs, currX, currY, null);
+            if (heroC.getX() == stairsX & heroC.getY() == stairsY) {
+                wonGame();
+            }
+        }
+    }
+
+    private void wonGame() {
+        Log.i("dan", "WON GAME");//TODO winning legshot
+        /*Toast.makeText(this.context, "You won! Congrats!", Toast.LENGTH_SHORT).show();
+        try {
+            this.sleep(Toast.LENGTH_SHORT);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+        setRunning(false);
+    }
+
+    private void HPPainting(Canvas canvas) { //TODO rework hp
         Log.i("dan", "ENTERED HP");
         float h = squares[numSqH - 1][0].getY() + 3 * square.getHeight();
         float w = squares[numSqH - 1][0].getX();
@@ -278,7 +315,6 @@ class DrawThread extends Thread {
                     }
             }
         }
-
     }
 
 
@@ -289,6 +325,7 @@ class DrawThread extends Thread {
                     enemy.setAlive(false);
             }
         }
+        checkIfAllAreDead();
     }
 
     private void enemyTurn() {
@@ -362,7 +399,17 @@ class DrawThread extends Thread {
                     }
             }
         }
+    }
 
+    private void checkIfAllAreDead() {
+        for (Creature c :
+                creatures) {
+            if (c.getIdentity() != 0)
+                if (c.getAlive())
+                    return;
+        }
+        Log.i("dan", "enemies killed,opening the stairs");
+        setAllEnemiesDead(true);
     }
 
     private void decrementHerosHp() {
@@ -407,7 +454,7 @@ class DrawThread extends Thread {
         return creatures;
     }
 
-    public Creature getHeroC() {
-        return heroC;
+    public boolean getAllEnemiesDead() {
+        return allEnemiesDead;
     }
 }
