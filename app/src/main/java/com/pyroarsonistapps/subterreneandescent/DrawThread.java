@@ -20,6 +20,7 @@ class DrawThread extends Thread {
     private int numSqH = 9;
     private int numSqW = 7;
     private Square[][] squares = new Square[numSqH][numSqW]; // [0][0],[0][1]...
+    private boolean[][] onTile = new boolean[numSqH][numSqW]; //TODO NOT WORKING
 
     private boolean allEnemiesDead = false;
 
@@ -55,9 +56,12 @@ class DrawThread extends Thread {
             creatures.add(new Hero(initHeroX, initHeroY));
         else
             creatures.add(new Hero(initHeroX, initHeroY, initHeroHP, initMaxHeroHP));
+        setOnTile(initHeroX, initHeroY, true);
         for (int i = 1; i < identities.size(); i++) {
-            if (identities.get(i) == 1)
+            if (identities.get(i) == 1) {
                 creatures.add(new Goblin(valueX.get(i), valueY.get(i)));
+                setOnTile(valueX.get(i), valueY.get(i), true);
+            }
         }
         heroC = creatures.get(0);
         Log.i("dan", heroC.getCurrentHP() + " HP!");
@@ -93,6 +97,14 @@ class DrawThread extends Thread {
         if (!allEnemiesDead)
             Toast.makeText(context, "Now descent on stairs to continue", Toast.LENGTH_SHORT).show(); //TODO opening stairs
         this.allEnemiesDead = allEnemiesDead;
+    }
+
+    public void setOnTile(int x, int y, boolean whats) {
+        onTile[y][x] = whats;
+    }
+
+    public boolean[][] getOnTile() {
+        return onTile;
     }
 
     @Override
@@ -215,7 +227,6 @@ class DrawThread extends Thread {
 
     boolean neighboringTiles(int x, int y) {
         if (Math.abs(x - heroC.getX()) <= possibleMovement & Math.abs(y - heroC.getY()) <= possibleMovement) {
-            Log.i("dan", "neighboring");
             return true;
         } else
             return false;
@@ -259,12 +270,14 @@ class DrawThread extends Thread {
 
     void moveHero(int x, int y) {
         Log.i("dan", "MOVING: " + heroC.getX() + " " + heroC.getY() + " TO " + x + " " + y);
+        setOnTile(heroC.getX(), heroC.getY(), false);
         // vector needed to aim
         setVector(x, y, heroC);
         setLastXYArray(heroC);
         Log.i("dan", "SET VECTOR TO : " + heroC.getVector());
         creatures.get(0).setX(x);
         creatures.get(0).setY(y);
+        setOnTile(x, y, true);
         paintSquare(-1, -1);
         checkHeroKilling();
         checkEnemyDeath();
@@ -345,6 +358,8 @@ class DrawThread extends Thread {
         int dist = (tempX[4] - heroC.getX()) * (tempX[4] - heroC.getX()) + (tempY[4] - heroC.getY()) * (tempY[4] - heroC.getY());
         int min = 4;
         for (int i = 0; i < 9; i++) {
+            if (onTile[tempY[i]][tempX[i]])
+                continue;
             int currDist = (tempX[i] - heroC.getX()) * (tempX[i] - heroC.getX()) + (tempY[i] - heroC.getY()) * (tempY[i] - heroC.getY());
             if (dist > currDist) {
                 dist = currDist;
@@ -358,6 +373,8 @@ class DrawThread extends Thread {
         }
 
         for (int i = 8; i > -1; i--) {
+            if (onTile[tempY[i]][tempX[i]])
+                continue;
             int currDist = (tempX[i] - heroC.getX()) * (tempX[i] - heroC.getX()) + (tempY[i] - heroC.getY()) * (tempY[i] - heroC.getY());
             if (dist > currDist) {
                 dist = currDist;
@@ -387,9 +404,9 @@ class DrawThread extends Thread {
         settingXY9Array(g.getX(), g.getY(), tempX, tempY);
         //check vector killing
 
-        if (tempX[g.getVector()] == heroC.getX() & tempY[g.getVector()] == heroC.getY()) {
+        /*if (tempX[g.getVector()] == heroC.getX() & tempY[g.getVector()] == heroC.getY()) { //too imbalanced
             decrementHerosHp();
-        }
+        }*/
         //another
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
