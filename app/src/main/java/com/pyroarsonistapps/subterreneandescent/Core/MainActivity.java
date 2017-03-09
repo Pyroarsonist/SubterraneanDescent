@@ -1,4 +1,4 @@
-package com.pyroarsonistapps.subterreneandescent;
+package com.pyroarsonistapps.subterreneandescent.Core;
 
 
 import android.app.Activity;
@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import com.pyroarsonistapps.subterreneandescent.R;
 
 public class MainActivity extends Activity {
     private int level = 1;

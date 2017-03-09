@@ -1,8 +1,8 @@
-package com.pyroarsonistapps.subterreneandescent;
+package com.pyroarsonistapps.subterreneandescent.Logic.Creatures;
 
-class Hero extends Creature {
+public class Hero extends Creature {
 
-    Hero(int x, int y, int initHeroHP, int initMaxHeroHP) {
+    public Hero(int x, int y, int initHeroHP, int initMaxHeroHP) {
         super(x, y);
         identity = 0;
         HP = initMaxHeroHP;

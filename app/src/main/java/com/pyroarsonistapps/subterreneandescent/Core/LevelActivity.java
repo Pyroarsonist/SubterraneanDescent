@@ -1,8 +1,7 @@
-package com.pyroarsonistapps.subterreneandescent;
+package com.pyroarsonistapps.subterreneandescent.Core;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 
 
 public class LevelActivity extends Activity {

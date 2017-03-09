@@ -1,25 +1,25 @@
-package com.pyroarsonistapps.subterreneandescent;
+package com.pyroarsonistapps.subterreneandescent.Logic.Creatures;
 
-abstract class Creature {
-    int identity;
-    int HP;
-    int currentHP;
+public abstract class Creature {
+    protected int identity;
+    protected int HP;
+    protected int currentHP;
 
-    int x; //on squares
-    int y;
+    protected int x; //on squares
+    protected int y;
 
-    int vector = 4;
-    int[] lastX = new int[9];
-    int[] lastY = new int[9];
+    protected int vector = 4;
+    protected int[] lastX = new int[9];
+    protected int[] lastY = new int[9];
 
-    boolean isAlive = true;
+    protected boolean isAlive = true;
 
-    Creature(int x, int y) {
+    public Creature(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    int getCurrentHP() {
+    public int getCurrentHP() {
         return currentHP;
     }
 
@@ -27,15 +27,15 @@ abstract class Creature {
         return HP;
     }
 
-    int getX() {
+    public int getX() {
         return x;
     }
 
-    int getY() {
+    public int getY() {
         return y;
     }
 
-    void setCurrentHP(int currentHP) {
+    public void setCurrentHP(int currentHP) {
         this.currentHP = currentHP;
     }
 
@@ -43,23 +43,23 @@ abstract class Creature {
         this.HP = HP;
     }
 
-    void setX(int x) {
+    public void setX(int x) {
         this.x = x;
     }
 
-    void setY(int y) {
+    public void setY(int y) {
         this.y = y;
     }
 
-    int getIdentity() {
+    public int getIdentity() {
         return identity;
     }
 
-    void setAlive(boolean alive) {
+    public void setAlive(boolean alive) {
         isAlive = alive;
     }
 
-    boolean getAlive() {
+    public boolean getAlive() {
         return isAlive;
     }
 

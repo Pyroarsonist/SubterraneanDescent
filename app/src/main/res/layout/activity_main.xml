@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.pyroarsonistapps.subterreneandescent.MainActivity">
+    tools:context="com.pyroarsonistapps.subterreneandescent.Core.MainActivity">
 
     <Button
         android:id="@+id/start_new_game"

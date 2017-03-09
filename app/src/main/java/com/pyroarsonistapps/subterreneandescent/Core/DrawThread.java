@@ -1,4 +1,4 @@
-package com.pyroarsonistapps.subterreneandescent;
+package com.pyroarsonistapps.subterreneandescent.Core;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,18 +10,21 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
+import com.pyroarsonistapps.subterreneandescent.Logic.Creatures.*;
+import com.pyroarsonistapps.subterreneandescent.R;
+import com.pyroarsonistapps.subterreneandescent.Logic.Square;
+
 import java.util.ArrayList;
 
 
 class DrawThread extends Thread {
 
-    private Bitmap square, suggestingSquare, hero, goblin, stairs;
+    private Bitmap square, suggestingSquare, hero, goblin, stairs, banned_square;
     private Context context;
     private int numSqH = 9;
     private int numSqW = 7;
     private Square[][] squares = new Square[numSqH][numSqW]; // [0][0],[0][1]...
-    private boolean[][] onTile = new boolean[numSqH][numSqW]; //TODO NOT WORKING
-
+    private boolean[][] onTile = new boolean[numSqH][numSqW];
     private boolean allEnemiesDead = false;
 
     private boolean running = false;
@@ -51,6 +54,7 @@ class DrawThread extends Thread {
 
     private Creature heroC;
 
+
     private void init(ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
         if (initHeroHP == 0 & initMaxHeroHP == 0)
             creatures.add(new Hero(initHeroX, initHeroY));
@@ -62,14 +66,23 @@ class DrawThread extends Thread {
                 creatures.add(new Goblin(valueX.get(i), valueY.get(i)));
                 setOnTile(valueX.get(i), valueY.get(i), true);
             }
+            if (identities.get(i) == 2) {
+                creatures.add(new Archer(valueX.get(i), valueY.get(i)));
+                setOnTile(valueX.get(i), valueY.get(i), true);
+            }
+            if (identities.get(i) == 3) {
+                creatures.add(new Mage(valueX.get(i), valueY.get(i)));
+                setOnTile(valueX.get(i), valueY.get(i), true);
+            }
         }
         heroC = creatures.get(0);
         Log.i("dan", heroC.getCurrentHP() + " HP!");
         square = BitmapFactory.decodeResource(context.getResources(), R.drawable.square);
-        suggestingSquare = BitmapFactory.decodeResource(context.getResources(), R.drawable.testsq);  //TODO
-        hero = BitmapFactory.decodeResource(context.getResources(), R.drawable.herox);
+        suggestingSquare = BitmapFactory.decodeResource(context.getResources(), R.drawable.suggesting_square);
+        hero = BitmapFactory.decodeResource(context.getResources(), R.drawable.hero);
         goblin = BitmapFactory.decodeResource(context.getResources(), R.drawable.goblin);
         stairs = BitmapFactory.decodeResource(context.getResources(), R.drawable.stairs);
+        banned_square = BitmapFactory.decodeResource(context.getResources(), R.drawable.banned_square);
     }
 
     DrawThread(SurfaceHolder surfaceHolder, Context c, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
@@ -152,7 +165,7 @@ class DrawThread extends Thread {
     }
 
     private void wonGame() {
-        Log.i("dan", "WON GAME");//TODO winning legshot
+        //Log.i("dan", "WON GAME");//TODO winning legshot
         /*Toast.makeText(this.context, "You won! Congrats!", Toast.LENGTH_SHORT).show();
         try {
             this.sleep(Toast.LENGTH_SHORT);
@@ -163,7 +176,7 @@ class DrawThread extends Thread {
     }
 
     private void HPPainting(Canvas canvas) { //TODO rework hp
-        Log.i("dan", "ENTERED HP");
+        //Log.i("dan", "ENTERED HP");
         float h = squares[numSqH - 1][0].getY() + 3 * square.getHeight();
         float w = squares[numSqH - 1][0].getX();
         Paint p = new Paint();
@@ -214,13 +227,18 @@ class DrawThread extends Thread {
     }
 
     private void suggestMove(Canvas canvas) {
-        if (paintSuggestingMoveSquare) {
-            if (paintingSuggestingMoveSquareX != -1 & paintingSuggestingMoveSquareY != -1)
-                if (neighboringTiles(paintingSuggestingMoveSquareX, paintingSuggestingMoveSquareY))
-                    canvas.drawBitmap(suggestingSquare, (int) squares[paintingSuggestingMoveSquareY][paintingSuggestingMoveSquareX].getX(),
-                            (int) squares[paintingSuggestingMoveSquareY][paintingSuggestingMoveSquareX].getY(), null);
-            setPaintSuggestingMoveSquare(false);
-            Log.i("dan", "CLOSED PAINT");
+        if (paintSuggestingMoveSquare & neighboringTiles(paintingSuggestingMoveSquareX, paintingSuggestingMoveSquareY)) {
+            if (paintingSuggestingMoveSquareX != -1 & paintingSuggestingMoveSquareY != -1) {
+                Bitmap current;
+                if (!onTile[paintingSuggestingMoveSquareY][paintingSuggestingMoveSquareX]) {
+                    current = suggestingSquare;
+                } else {
+                    current = banned_square;
+                }
+                canvas.drawBitmap(current, (int) squares[paintingSuggestingMoveSquareY][paintingSuggestingMoveSquareX].getX(),
+                        (int) squares[paintingSuggestingMoveSquareY][paintingSuggestingMoveSquareX].getY(), null);
+                setPaintSuggestingMoveSquare(false);
+            }
         }
     }
 
@@ -269,12 +287,12 @@ class DrawThread extends Thread {
     }
 
     void moveHero(int x, int y) {
-        Log.i("dan", "MOVING: " + heroC.getX() + " " + heroC.getY() + " TO " + x + " " + y);
+        //Log.i("dan", "MOVING: " + heroC.getX() + " " + heroC.getY() + " TO " + x + " " + y);
         setOnTile(heroC.getX(), heroC.getY(), false);
         // vector needed to aim
         setVector(x, y, heroC);
         setLastXYArray(heroC);
-        Log.i("dan", "SET VECTOR TO : " + heroC.getVector());
+        //Log.i("dan", "SET VECTOR TO : " + heroC.getVector());
         creatures.get(0).setX(x);
         creatures.get(0).setY(y);
         setOnTile(x, y, true);
@@ -334,8 +352,10 @@ class DrawThread extends Thread {
     private void checkEnemyDeath() {
         for (Creature enemy : creatures) {
             if (enemy.getIdentity() != 0) {
-                if (enemy.getCurrentHP() <= 0)
+                if (enemy.getCurrentHP() <= 0 & enemy.getAlive()) {
+                    setOnTile(enemy.getX(), enemy.getY(), false);
                     enemy.setAlive(false);
+                }
             }
         }
         checkIfAllAreDead();
@@ -351,8 +371,9 @@ class DrawThread extends Thread {
     }
 
     private void checkingGoblinTurn(Creature g) {
+        setOnTile(g.getX(), g.getY(), false);
         //how is goblin moving
-        int tempX[] = new int[9];  //TODO 2 creatures in 1 tile legshot
+        int tempX[] = new int[9];
         int tempY[] = new int[9];
         settingXY9Array(g.getX(), g.getY(), tempX, tempY);
         int dist = (tempX[4] - heroC.getX()) * (tempX[4] - heroC.getX()) + (tempY[4] - heroC.getY()) * (tempY[4] - heroC.getY());
@@ -394,7 +415,8 @@ class DrawThread extends Thread {
 
         g.setX(tempX[min]);
         g.setY(tempY[min]);
-        Log.i("dan", "MOVING GOBLING: " + tempX[min] + " " + tempY[min]);
+        // Log.i("dan", "MOVING GOBLING: " + tempX[min] + " " + tempY[min]);
+        setOnTile(g.getX(), g.getY(), true);
         checkGoblinKilling(g);
     }
 
@@ -425,13 +447,13 @@ class DrawThread extends Thread {
                 if (c.getAlive())
                     return;
         }
-        Log.i("dan", "enemies killed,opening the stairs");
+        //  Log.i("dan", "enemies killed,opening the stairs");
         setAllEnemiesDead(true);
     }
 
     private void decrementHerosHp() {
         heroC.setCurrentHP(heroC.getCurrentHP() - 1);
-        Log.i("dan", "DAMAGING HERO, NOW HERO'S HP: " + heroC.getCurrentHP() + "/" + heroC.getHP());
+        // Log.i("dan", "DAMAGING HERO, NOW HERO'S HP: " + heroC.getCurrentHP() + "/" + heroC.getHP());
         checkHerosDeath();
     }
 
@@ -444,7 +466,7 @@ class DrawThread extends Thread {
     }
 
     private void endGame() {
-        Log.i("dan", "END OF GAME");
+        //  Log.i("dan", "END OF GAME");
         Toast.makeText(this.context, "You lost...", Toast.LENGTH_SHORT).show();
         setRunning(false);
     }

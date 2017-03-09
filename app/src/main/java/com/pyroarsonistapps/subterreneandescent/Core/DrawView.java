@@ -1,12 +1,13 @@
-package com.pyroarsonistapps.subterreneandescent;
+package com.pyroarsonistapps.subterreneandescent.Core;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
+
+import com.pyroarsonistapps.subterreneandescent.Logic.Square;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -108,7 +109,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         if (action == MotionEvent.ACTION_DOWN) {
             targetX = event.getX();
             targetY = event.getY();
-                // Log.i("dan", "dot: " + targetX + " " + targetY);
+            // Log.i("dan", "dot: " + targetX + " " + targetY);
             //drawing = true;
             //xy[0]=x square xy[1]=y;
             int[] xy = drawThread.getSquareNum(targetX, targetY);
@@ -116,9 +117,11 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             if (xy != null) {
                 //Toast.makeText(this.getContext(), xy[0] + " " + xy[1], Toast.LENGTH_SHORT).show();
                 if (drawThread.getPaintingSuggestingMoveSquareX() == xy[0] & drawThread.getPaintingSuggestingMoveSquareY() == xy[1] & drawThread.neighboringTiles(xy[0], xy[1])) {
-                    drawThread.moveHero(drawThread.getPaintingSuggestingMoveSquareX(), drawThread.getPaintingSuggestingMoveSquareY());
-                } else if (!drawThread.getOnTile()[xy[1]][xy[0]]) {
-                    Log.i("dan", "getOnTile: " + drawThread.getOnTile()[xy[1]][xy[0]]);
+                    if (!drawThread.getOnTile()[drawThread.getPaintingSuggestingMoveSquareY()][drawThread.getPaintingSuggestingMoveSquareX()])
+                        //!drawThread.getBanned()
+                        drawThread.moveHero(drawThread.getPaintingSuggestingMoveSquareX(), drawThread.getPaintingSuggestingMoveSquareY());
+                } else {
+                    //  Log.i("dan", "getOnTile: " + drawThread.getOnTile()[xy[1]][xy[0]]);
                     drawThread.paintSquare(xy[0], xy[1]);
                 }
             } else {
@@ -126,7 +129,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
                 drawThread.paintSquare(-1, -1);
             }
             drawThread.setPaintSuggestingMoveSquare(true);
-            drawThread.setRepaint(true); //TODO
+            drawThread.setRepaint(true);
         }
 
         return true;
