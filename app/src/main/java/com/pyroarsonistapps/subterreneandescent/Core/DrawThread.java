@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 class DrawThread extends Thread {
 
-    private Bitmap square, suggestingSquare, hero, goblin, stairs, banned_square;
+    private Bitmap square, suggestingSquare, hero, goblin, stairs, banned_square, mage, archer;
     private Context context;
     private int numSqH = 9;
     private int numSqW = 7;
@@ -83,6 +83,8 @@ class DrawThread extends Thread {
         goblin = BitmapFactory.decodeResource(context.getResources(), R.drawable.goblin);
         stairs = BitmapFactory.decodeResource(context.getResources(), R.drawable.stairs);
         banned_square = BitmapFactory.decodeResource(context.getResources(), R.drawable.banned_square);
+        archer = BitmapFactory.decodeResource(context.getResources(), R.drawable.archer);
+        mage = BitmapFactory.decodeResource(context.getResources(), R.drawable.mage);
     }
 
     DrawThread(SurfaceHolder surfaceHolder, Context c, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
@@ -134,8 +136,7 @@ class DrawThread extends Thread {
                     setSquareMap(canvas);
                     putSquareMap(canvas);
                     stairsPainting(canvas);
-                    heroPaint(canvas);
-                    enemyPaint(canvas);
+                    creaturePaint(canvas);
                     suggestMove(canvas);
                     HPPainting(canvas);
 
@@ -191,15 +192,28 @@ class DrawThread extends Thread {
         canvas.drawText(text, w, h, p);
     }
 
-    private void enemyPaint(Canvas canvas) {
-        for (Creature enemy : creatures) {
-            if (enemy.getIdentity() != 0) {
-                if (enemy.getAlive())
-                    canvas.drawBitmap(goblin, (int) squares[enemy.getY()][enemy.getX()].getX(),
-                            (int) squares[enemy.getY()][enemy.getX()].getY(), null);
+    private void creaturePaint(Canvas canvas) {
+        for (Creature cr : creatures) {
+            if (cr.getAlive()) {
+                Bitmap creaturesBitmap;
+                switch (cr.getIdentity()) {
+                    case 1:
+                        creaturesBitmap = goblin;
+                        break;
+                    case 2:
+                        creaturesBitmap = archer;
+                        break;
+                    case 3:
+                        creaturesBitmap = mage;
+                        break;
+                    default:
+                        creaturesBitmap = hero;
+                        break;
+                }
+                canvas.drawBitmap(creaturesBitmap, (int) squares[cr.getY()][cr.getX()].getX(),
+                        (int) squares[cr.getY()][cr.getX()].getY(), null);
             }
         }
-
     }
 
 
@@ -273,10 +287,6 @@ class DrawThread extends Thread {
         paintingSuggestingMoveSquareY = y;
     }
 
-    private void heroPaint(Canvas canvas) {
-        canvas.drawBitmap(hero, (int) squares[heroC.getY()][heroC.getX()].getX(),
-                (int) squares[heroC.getY()][heroC.getX()].getY(), null);
-    }
 
     int getPaintingSuggestingMoveSquareX() {
         return paintingSuggestingMoveSquareX;
@@ -366,22 +376,22 @@ class DrawThread extends Thread {
             if (enemy.getAlive()) {
                 if (enemy.getIdentity() == 1)
                     checkingGoblinTurn(enemy);
+                else if (enemy.getIdentity() == 2)
+                    checkingArcherTurn(enemy);
+                else if (enemy.getIdentity() == 3)
+                    checkingMageTurn(enemy);
             }
         }
     }
 
-    private void checkingGoblinTurn(Creature g) {
-        setOnTile(g.getX(), g.getY(), false);
-        //how is goblin moving
-        int tempX[] = new int[9];
-        int tempY[] = new int[9];
-        settingXY9Array(g.getX(), g.getY(), tempX, tempY);
-        int dist = (tempX[4] - heroC.getX()) * (tempX[4] - heroC.getX()) + (tempY[4] - heroC.getY()) * (tempY[4] - heroC.getY());
+
+    private int getWayToSquare(int[] tempX, int[] tempY, int x, int y) {
+        int dist = (tempX[4] - x) * (tempX[4] - x) + (tempY[4] - y) * (tempY[4] - y);
         int min = 4;
         for (int i = 0; i < 9; i++) {
             if (onTile[tempY[i]][tempX[i]])
                 continue;
-            int currDist = (tempX[i] - heroC.getX()) * (tempX[i] - heroC.getX()) + (tempY[i] - heroC.getY()) * (tempY[i] - heroC.getY());
+            int currDist = (tempX[i] - x) * (tempX[i] - x) + (tempY[i] - y) * (tempY[i] - y);
             if (dist > currDist) {
                 dist = currDist;
                 min = i;
@@ -396,7 +406,7 @@ class DrawThread extends Thread {
         for (int i = 8; i > -1; i--) {
             if (onTile[tempY[i]][tempX[i]])
                 continue;
-            int currDist = (tempX[i] - heroC.getX()) * (tempX[i] - heroC.getX()) + (tempY[i] - heroC.getY()) * (tempY[i] - heroC.getY());
+            int currDist = (tempX[i] - x) * (tempX[i] - x) + (tempY[i] - y) * (tempY[i] - y);
             if (dist > currDist) {
                 dist = currDist;
                 min = i;
@@ -408,16 +418,143 @@ class DrawThread extends Thread {
             if (tempX[min] == c.getX() & tempY[min] == c.getY())
                 min = 4;
         }
+        return min;
+    }
 
+    private void checkingGoblinTurn(Creature g) {
+        setOnTile(g.getX(), g.getY(), false);
+        //how is goblin moving
+        int tempX[] = new int[9];
+        int tempY[] = new int[9];
+        settingXY9Array(g.getX(), g.getY(), tempX, tempY);
+        //changing way
+        int way = getWayToSquare(tempX, tempY, heroC.getX(), heroC.getY());
         //premove
-        setVector(tempX[min], tempY[min], g);
+        setVector(tempX[way], tempY[way], g);
         setLastXYArray(g);
-
-        g.setX(tempX[min]);
-        g.setY(tempY[min]);
+        g.setX(tempX[way]);
+        g.setY(tempY[way]);
         // Log.i("dan", "MOVING GOBLING: " + tempX[min] + " " + tempY[min]);
         setOnTile(g.getX(), g.getY(), true);
         checkGoblinKilling(g);
+    }
+
+    private void checkingArcherTurn(Creature a) {  //TODO more hard checking needed
+        boolean nonwaiting = true;
+        setOnTile(a.getX(), a.getY(), false);
+        //how is archer moving
+        int tempX[] = new int[9];
+        int tempY[] = new int[9];
+        settingXY9Array(a.getX(), a.getY(), tempX, tempY);
+        //receiving x and y of hero
+        int x = heroC.getX();
+        int y = heroC.getY();
+        //MAKING FIELD
+        //init tangent squares
+        ArrayList<Integer> neededSquareX = new ArrayList<>();
+        ArrayList<Integer> neededSquareY = new ArrayList<>();
+        for (int i = 0; i < numSqH; i++) {
+            for (int j = 0; j < numSqW; j++) {
+                if (onTile[i][j]) {
+                    if (i == y | j == x) {
+                        neededSquareX.add(j);
+                        neededSquareY.add(i);
+                    }
+                }
+            }
+        }
+        if (neededSquareX.isEmpty()) {
+            nonwaiting = false;
+        }
+        //changing way
+
+        int way = 4;
+        if (nonwaiting) {
+            int index = 0;
+            int dist = (tempX[4] - neededSquareX.get(0)) * (tempX[4] - neededSquareX.get(0)) + (tempY[4] - neededSquareY.get(0)) * (tempY[4] - neededSquareY.get(0));
+            for (int w : neededSquareX) {
+                int currentIndex = neededSquareX.indexOf(w);
+                int h = neededSquareY.get(currentIndex);
+                int currentDistance = (tempX[4] - w) * (tempX[4] - w) + (tempY[4] - h) * (tempY[4] - h);
+                if (currentDistance <= dist) {
+                    index = currentIndex;
+                }
+            }
+
+            //where we moving
+            int toSquareX = neededSquareX.get(index);
+            int toSquareY = neededSquareY.get(index);
+            way = getWayToSquare(tempX, tempY, toSquareX, toSquareY);
+        }
+        //premove
+        setVector(tempX[way], tempY[way], a);
+        setLastXYArray(a);
+        a.setX(tempX[way]);
+        a.setY(tempY[way]);
+        Log.i("dan", "MOVING ARCHER: " + tempX[way] + " " + tempY[way]);
+        setOnTile(a.getX(), a.getY(), true);
+        checkArcherKilling(a);
+    }
+
+
+    //TODO need to check publish archer field and to check making mage
+
+    private void checkingMageTurn(Creature m) {
+        //TODO more hard checking needed
+        boolean nonwaiting = true;
+        setOnTile(m.getX(), m.getY(), false);
+        //how is mage moving
+        int tempX[] = new int[9];
+        int tempY[] = new int[9];
+        settingXY9Array(m.getX(), m.getY(), tempX, tempY);
+        //receiving x and y of hero
+        int x = heroC.getX();
+        int y = heroC.getY();
+        //MAKING FIELD
+        //init tangent squares
+        ArrayList<Integer> neededSquareX = new ArrayList<>();
+        ArrayList<Integer> neededSquareY = new ArrayList<>();
+        for (int i = 0; i < numSqH; i++) {
+            for (int j = 0; j < numSqW; j++) {
+                if (onTile[i][j]) {
+                    if ((x - j) * (x - j) == (i - y) * (i - y)) {
+                        neededSquareX.add(j);
+                        neededSquareY.add(i);
+                    }
+                }
+            }
+        }
+        if (neededSquareX.isEmpty()) {
+            nonwaiting = false;
+        }
+        //changing way
+
+        int way = 4;
+        if (nonwaiting) {
+            int index = 0;
+            int dist = (tempX[4] - neededSquareX.get(0)) * (tempX[4] - neededSquareX.get(0)) + (tempY[4] - neededSquareY.get(0)) * (tempY[4] - neededSquareY.get(0));
+            for (int w : neededSquareX) {
+                int currentIndex = neededSquareX.indexOf(w);
+                int h = neededSquareY.get(currentIndex);
+                int currentDistance = (tempX[4] - w) * (tempX[4] - w) + (tempY[4] - h) * (tempY[4] - h);
+                if (currentDistance <= dist) {
+                    index = currentIndex;
+                }
+            }
+
+            //where we moving
+            int toSquareX = neededSquareX.get(index);
+            int toSquareY = neededSquareY.get(index);
+            way = getWayToSquare(tempX, tempY, toSquareX, toSquareY);
+        }
+        //premove
+        setVector(tempX[way], tempY[way], m);
+        setLastXYArray(m);
+        m.setX(tempX[way]);
+        m.setY(tempY[way]);
+        Log.i("dan", "MOVING MAGE: " + tempX[way] + " " + tempY[way]);
+        setOnTile(m.getX(), m.getY(), true);
+        checkArcherKilling(m);
     }
 
     private void checkGoblinKilling(Creature g) {
@@ -437,6 +574,13 @@ class DrawThread extends Thread {
                         decrementHerosHp();
                     }
             }
+        }
+    }
+
+    private void checkArcherKilling(Creature a) {
+        //check x and y of hero
+        if (heroC.getX() == a.getX() | heroC.getY() == a.getY()) {
+            decrementHerosHp();
         }
     }
 
