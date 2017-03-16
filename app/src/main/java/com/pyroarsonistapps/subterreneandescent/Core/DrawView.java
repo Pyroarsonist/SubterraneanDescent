@@ -69,7 +69,8 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             }
         }
         switch (level) {
-            case 1: {
+            case 2: {
+                //2 goblins
                 for (int i = 0; i < 2; i++) {
                     int cX = rn.nextInt(numSqW);
                     int cY = rn.nextInt(numSqH);
@@ -80,6 +81,43 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
                         i--;
                     }
                 }
+                break;
+            }
+//CARE!
+            case 1: {
+                //goblin and mage for debug
+                /*for (int i = 0; i < 2; i++) {
+                    int cX = rn.nextInt(numSqW);
+                    int cY = rn.nextInt(numSqH);
+                    if (availableToGenerate[cY][cX]) {
+                        initCreature(1, cY, cX);
+                        availableToGenerate[cY][cX] = false;
+                    } else {
+                        i--;
+                    }
+                }*/
+
+                for (int i = 0; i < 1; i++) {
+                    int cX = rn.nextInt(numSqW);
+                    int cY = rn.nextInt(numSqH);
+                    if (availableToGenerate[cY][cX]) {
+                        initCreature(2, cY, cX);
+                        availableToGenerate[cY][cX] = false;
+                    } else {
+                        i--;
+                    }
+                }
+                for (int i = 0; i < 1; i++) {
+                    int cX = rn.nextInt(numSqW);
+                    int cY = rn.nextInt(numSqH);
+                    if (availableToGenerate[cY][cX]) {
+                        initCreature(3, cY, cX);
+                        availableToGenerate[cY][cX] = false;
+                    } else {
+                        i--;
+                    }
+                }
+                break;
             }
         }
     } //TODO generate

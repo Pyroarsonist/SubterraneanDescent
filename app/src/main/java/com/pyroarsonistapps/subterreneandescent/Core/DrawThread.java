@@ -307,12 +307,12 @@ class DrawThread extends Thread {
         creatures.get(0).setY(y);
         setOnTile(x, y, true);
         paintSquare(-1, -1);
-        checkHeroKilling();
+        checkHeroHarrasing();
         checkEnemyDeath();
         enemyTurn();
     }
 
-    private void setLastXYArray(Creature c) { //TODO GOBLINS
+    private void setLastXYArray(Creature c) {
         int[] tempX = new int[9];
         int[] tempY = new int[9];
         settingXY9Array(c.getX(), c.getY(), tempX, tempY);
@@ -333,7 +333,7 @@ class DrawThread extends Thread {
         }
     }
 
-    private void checkHeroKilling() {
+    private void checkHeroHarrasing() {
         int[] tempX = new int[9];
         int[] tempY = new int[9];
         settingXY9Array(heroC.getX(), heroC.getY(), tempX, tempY);
@@ -389,6 +389,8 @@ class DrawThread extends Thread {
         int dist = (tempX[4] - x) * (tempX[4] - x) + (tempY[4] - y) * (tempY[4] - y);
         int min = 4;
         for (int i = 0; i < 9; i++) {
+            if (tempX[i] == -1 | tempY[i] == -1)
+                continue;
             if (onTile[tempY[i]][tempX[i]])
                 continue;
             int currDist = (tempX[i] - x) * (tempX[i] - x) + (tempY[i] - y) * (tempY[i] - y);
@@ -404,6 +406,8 @@ class DrawThread extends Thread {
         }
 
         for (int i = 8; i > -1; i--) {
+            if (tempX[i] == -1 | tempY[i] == -1)
+                continue;
             if (onTile[tempY[i]][tempX[i]])
                 continue;
             int currDist = (tempX[i] - x) * (tempX[i] - x) + (tempY[i] - y) * (tempY[i] - y);
@@ -422,142 +426,158 @@ class DrawThread extends Thread {
     }
 
     private void checkingGoblinTurn(Creature g) {
-        setOnTile(g.getX(), g.getY(), false);
-        //how is goblin moving
-        int tempX[] = new int[9];
-        int tempY[] = new int[9];
-        settingXY9Array(g.getX(), g.getY(), tempX, tempY);
-        //changing way
-        int way = getWayToSquare(tempX, tempY, heroC.getX(), heroC.getY());
-        //premove
-        setVector(tempX[way], tempY[way], g);
+        boolean canHarassHero = canGoblinHarrasing(g);
+        if (!canHarassHero) {
+            setOnTile(g.getX(), g.getY(), false);
+            //how is goblin moving
+            int tempX[] = new int[9];
+            int tempY[] = new int[9];
+            settingXY9Array(g.getX(), g.getY(), tempX, tempY);
+            //changing way
+            int way = getWayToSquare(tempX, tempY, heroC.getX(), heroC.getY());
+            //premove
+            setVector(tempX[way], tempY[way], g);
+            g.setX(tempX[way]);
+            g.setY(tempY[way]);
+            // Log.i("dan", "MOVING GOBLING: " + tempX[min] + " " + tempY[min]);
+            setOnTile(g.getX(), g.getY(), true);
+        } else {
+            checkGoblinHarrasing(g);
+            g.setVector(4);
+        }
         setLastXYArray(g);
-        g.setX(tempX[way]);
-        g.setY(tempY[way]);
-        // Log.i("dan", "MOVING GOBLING: " + tempX[min] + " " + tempY[min]);
-        setOnTile(g.getX(), g.getY(), true);
-        checkGoblinKilling(g);
     }
 
-    private void checkingArcherTurn(Creature a) {  //TODO more hard checking needed
-        boolean nonwaiting = true;
-        setOnTile(a.getX(), a.getY(), false);
-        //how is archer moving
-        int tempX[] = new int[9];
-        int tempY[] = new int[9];
-        settingXY9Array(a.getX(), a.getY(), tempX, tempY);
-        //receiving x and y of hero
-        int x = heroC.getX();
-        int y = heroC.getY();
-        //MAKING FIELD
-        //init tangent squares
-        ArrayList<Integer> neededSquareX = new ArrayList<>();
-        ArrayList<Integer> neededSquareY = new ArrayList<>();
-        for (int i = 0; i < numSqH; i++) {
-            for (int j = 0; j < numSqW; j++) {
-                if (onTile[i][j]) {
-                    if (i == y | j == x) {
-                        neededSquareX.add(j);
-                        neededSquareY.add(i);
+
+    private void checkingArcherTurn(Creature a) {
+        //TODO more hard checking needed
+        boolean canHarassHero = canArcherHarrasing(a);
+        if (!canHarassHero) {
+            boolean nonwaiting = true;
+            setOnTile(a.getX(), a.getY(), false);
+            //how is archer moving
+            int tempX[] = new int[9];
+            int tempY[] = new int[9];
+            settingXY9Array(a.getX(), a.getY(), tempX, tempY);
+            //receiving x and y of hero
+            int x = heroC.getX();
+            int y = heroC.getY();
+            //MAKING FIELD
+            //init tangent squares
+            ArrayList<Integer> neededSquareX = new ArrayList<>();
+            ArrayList<Integer> neededSquareY = new ArrayList<>();
+            for (int i = 0; i < numSqH; i++) {
+                for (int j = 0; j < numSqW; j++) {
+                    if (onTile[i][j]) {
+                        if (i == y | j == x) {
+                            neededSquareX.add(j);
+                            neededSquareY.add(i);
+                        }
                     }
                 }
             }
-        }
-        if (neededSquareX.isEmpty()) {
-            nonwaiting = false;
-        }
-        //changing way
-
-        int way = 4;
-        if (nonwaiting) {
-            int index = 0;
-            int dist = (tempX[4] - neededSquareX.get(0)) * (tempX[4] - neededSquareX.get(0)) + (tempY[4] - neededSquareY.get(0)) * (tempY[4] - neededSquareY.get(0));
-            for (int w : neededSquareX) {
-                int currentIndex = neededSquareX.indexOf(w);
-                int h = neededSquareY.get(currentIndex);
-                int currentDistance = (tempX[4] - w) * (tempX[4] - w) + (tempY[4] - h) * (tempY[4] - h);
-                if (currentDistance <= dist) {
-                    index = currentIndex;
-                }
+            if (neededSquareX.isEmpty()) {
+                nonwaiting = false;
             }
+            //changing way
 
-            //where we moving
-            int toSquareX = neededSquareX.get(index);
-            int toSquareY = neededSquareY.get(index);
-            way = getWayToSquare(tempX, tempY, toSquareX, toSquareY);
+            int way = 4;
+            if (nonwaiting) {
+                int index = 0;
+                int dist = (tempX[4] - neededSquareX.get(0)) * (tempX[4] - neededSquareX.get(0)) + (tempY[4] - neededSquareY.get(0)) * (tempY[4] - neededSquareY.get(0));
+                for (int w : neededSquareX) {
+                    int currentIndex = neededSquareX.indexOf(w);
+                    int h = neededSquareY.get(currentIndex);
+                    int currentDistance = (tempX[4] - w) * (tempX[4] - w) + (tempY[4] - h) * (tempY[4] - h);
+                    if (currentDistance <= dist) {
+                        index = currentIndex;
+                    }
+                }
+
+                //where we moving
+                int toSquareX = neededSquareX.get(index);
+                int toSquareY = neededSquareY.get(index);
+                way = getWayToSquare(tempX, tempY, toSquareX, toSquareY);
+            }
+            //premove
+            setVector(tempX[way], tempY[way], a);
+            a.setX(tempX[way]);
+            a.setY(tempY[way]);
+            Log.i("dan", "MOVING ARCHER: " + tempX[way] + " " + tempY[way]);
+            setOnTile(a.getX(), a.getY(), true);
+        } else {
+            checkArcherHarrasing(a);
+            a.setVector(4);
         }
-        //premove
-        setVector(tempX[way], tempY[way], a);
         setLastXYArray(a);
-        a.setX(tempX[way]);
-        a.setY(tempY[way]);
-        Log.i("dan", "MOVING ARCHER: " + tempX[way] + " " + tempY[way]);
-        setOnTile(a.getX(), a.getY(), true);
-        checkArcherKilling(a);
     }
-
-
-    //TODO need to check publish archer field and to check making mage
 
     private void checkingMageTurn(Creature m) {
-        //TODO more hard checking needed
-        boolean nonwaiting = true;
-        setOnTile(m.getX(), m.getY(), false);
-        //how is mage moving
-        int tempX[] = new int[9];
-        int tempY[] = new int[9];
-        settingXY9Array(m.getX(), m.getY(), tempX, tempY);
-        //receiving x and y of hero
-        int x = heroC.getX();
-        int y = heroC.getY();
-        //MAKING FIELD
-        //init tangent squares
-        ArrayList<Integer> neededSquareX = new ArrayList<>();
-        ArrayList<Integer> neededSquareY = new ArrayList<>();
-        for (int i = 0; i < numSqH; i++) {
-            for (int j = 0; j < numSqW; j++) {
-                if (onTile[i][j]) {
-                    if ((x - j) * (x - j) == (i - y) * (i - y)) {
-                        neededSquareX.add(j);
-                        neededSquareY.add(i);
+        //TODO MORE hard checking needed
+        //now retarded system
+        //TODO need rework
+        boolean canHarassHero = canMageHarrasing(m);
+        if (!canHarassHero) {
+            boolean nonwaiting = true;
+            setOnTile(m.getX(), m.getY(), false);
+            //how is mage moving
+            int tempX[] = new int[9];
+            int tempY[] = new int[9];
+            settingXY9Array(m.getX(), m.getY(), tempX, tempY);
+            //receiving x and y of hero
+            int x = heroC.getX();
+            int y = heroC.getY();
+            //MAKING FIELD
+            //init tangent squares
+            ArrayList<Integer> neededSquareX = new ArrayList<>();
+            ArrayList<Integer> neededSquareY = new ArrayList<>();
+            for (int i = 0; i < numSqH; i++) {
+                for (int j = 0; j < numSqW; j++) {
+                    if (onTile[i][j]) {
+                        if ((x - j) * (x - j) == (i - y) * (i - y)) {
+                            neededSquareX.add(j);
+                            neededSquareY.add(i);
+                        }
                     }
                 }
             }
-        }
-        if (neededSquareX.isEmpty()) {
-            nonwaiting = false;
-        }
-        //changing way
-
-        int way = 4;
-        if (nonwaiting) {
-            int index = 0;
-            int dist = (tempX[4] - neededSquareX.get(0)) * (tempX[4] - neededSquareX.get(0)) + (tempY[4] - neededSquareY.get(0)) * (tempY[4] - neededSquareY.get(0));
-            for (int w : neededSquareX) {
-                int currentIndex = neededSquareX.indexOf(w);
-                int h = neededSquareY.get(currentIndex);
-                int currentDistance = (tempX[4] - w) * (tempX[4] - w) + (tempY[4] - h) * (tempY[4] - h);
-                if (currentDistance <= dist) {
-                    index = currentIndex;
-                }
+            if (neededSquareX.isEmpty()) {
+                nonwaiting = false;
             }
+            //changing way
 
-            //where we moving
-            int toSquareX = neededSquareX.get(index);
-            int toSquareY = neededSquareY.get(index);
-            way = getWayToSquare(tempX, tempY, toSquareX, toSquareY);
+            int way = 4;
+            if (nonwaiting) {
+                int index = 0;
+                int dist = (tempX[4] - neededSquareX.get(0)) * (tempX[4] - neededSquareX.get(0)) + (tempY[4] - neededSquareY.get(0)) * (tempY[4] - neededSquareY.get(0));
+                for (int w : neededSquareX) {
+                    int currentIndex = neededSquareX.indexOf(w);
+                    int h = neededSquareY.get(currentIndex);
+                    int currentDistance = (tempX[4] - w) * (tempX[4] - w) + (tempY[4] - h) * (tempY[4] - h);
+                    if (currentDistance <= dist) {
+                        index = currentIndex;
+                    }
+                }
+
+                //where we moving
+                int toSquareX = neededSquareX.get(index);
+                int toSquareY = neededSquareY.get(index);
+                way = getWayToSquare(tempX, tempY, toSquareX, toSquareY);
+            }
+            //premove
+            setVector(tempX[way], tempY[way], m);
+            m.setX(tempX[way]);
+            m.setY(tempY[way]);
+            Log.i("dan", "MOVING MAGE: " + tempX[way] + " " + tempY[way]);
+            setOnTile(m.getX(), m.getY(), true);
+        } else {
+            checkMageHarrasing(m);
+            m.setVector(4);
         }
-        //premove
-        setVector(tempX[way], tempY[way], m);
         setLastXYArray(m);
-        m.setX(tempX[way]);
-        m.setY(tempY[way]);
-        Log.i("dan", "MOVING MAGE: " + tempX[way] + " " + tempY[way]);
-        setOnTile(m.getX(), m.getY(), true);
-        checkArcherKilling(m);
     }
 
-    private void checkGoblinKilling(Creature g) {
+    private boolean canGoblinHarrasing(Creature g) {
         int[] tempX = new int[9];
         int[] tempY = new int[9];
         settingXY9Array(g.getX(), g.getY(), tempX, tempY);
@@ -571,15 +591,39 @@ class DrawThread extends Thread {
             for (int j = 0; j < 9; j++) {
                 if (tempX[i] == g.getLastX()[j] & tempY[i] == g.getLastY()[j])
                     if (tempX[i] == heroC.getX() & tempY[i] == heroC.getY()) {
-                        decrementHerosHp();
+                        return true;
                     }
             }
         }
+        return false;
     }
 
-    private void checkArcherKilling(Creature a) {
+    private boolean canArcherHarrasing(Creature a) {
         //check x and y of hero
-        if (heroC.getX() == a.getX() | heroC.getY() == a.getY()) {
+        return heroC.getX() == a.getX() | heroC.getY() == a.getY();
+    }
+
+    private boolean canMageHarrasing(Creature m) {
+        //check x and y of hero
+        return (heroC.getX() - m.getX()) * (heroC.getX() - m.getX()) == (heroC.getY() - m.getY()) * (heroC.getY() - m.getY());
+    }
+
+    private void checkGoblinHarrasing(Creature g) {
+        if (canGoblinHarrasing(g)) {
+            decrementHerosHp();
+        }
+    }
+
+    private void checkArcherHarrasing(Creature a) {
+        if (canArcherHarrasing(a)) {
+            Log.i("dan", "ARCHER HARASS from: " + a.getX() + " " + a.getY());
+            decrementHerosHp();
+        }
+    }
+
+    private void checkMageHarrasing(Creature m) {
+        if (canMageHarrasing(m)) {
+            Log.i("dan", "MAGE HARASS from: " + m.getX() + " " + m.getY());
             decrementHerosHp();
         }
     }
@@ -631,6 +675,12 @@ class DrawThread extends Thread {
         arrX[6] = x - 1;
         arrX[7] = x;
         arrX[8] = x + 1;
+        for (int i = 0; i < arrX.length; i++) {
+            if (arrX[i] >= numSqW | arrX[i] < 0 | arrY[i] < 0 | arrX[i] >= numSqH) {
+                arrX[i] = -1;
+                arrY[i] = -1;
+            }
+        }
     }
 
     public ArrayList<Creature> getCreatures() {
