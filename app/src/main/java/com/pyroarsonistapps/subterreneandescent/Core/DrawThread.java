@@ -439,7 +439,7 @@ class DrawThread extends Thread {
             setVector(tempX[way], tempY[way], g);
             g.setX(tempX[way]);
             g.setY(tempY[way]);
-            // Log.i("dan", "MOVING GOBLING: " + tempX[min] + " " + tempY[min]);
+            Log.i("dan", "MOVING GOBLING: " + tempX[way] + " " + tempY[way]);
             setOnTile(g.getX(), g.getY(), true);
         } else {
             checkGoblinHarrasing(g);
@@ -450,7 +450,6 @@ class DrawThread extends Thread {
 
 
     private void checkingArcherTurn(Creature a) {
-        //TODO more hard checking needed
         boolean canHarassHero = canArcherHarrasing(a);
         if (!canHarassHero) {
             boolean nonwaiting = true;
@@ -468,7 +467,7 @@ class DrawThread extends Thread {
             ArrayList<Integer> neededSquareY = new ArrayList<>();
             for (int i = 0; i < numSqH; i++) {
                 for (int j = 0; j < numSqW; j++) {
-                    if (onTile[i][j]) {
+                    if (!onTile[i][j]) {
                         if (i == y | j == x) {
                             neededSquareX.add(j);
                             neededSquareY.add(i);
@@ -513,9 +512,6 @@ class DrawThread extends Thread {
     }
 
     private void checkingMageTurn(Creature m) {
-        //TODO MORE hard checking needed
-        //now retarded system
-        //TODO need rework
         boolean canHarassHero = canMageHarrasing(m);
         if (!canHarassHero) {
             boolean nonwaiting = true;
@@ -533,7 +529,7 @@ class DrawThread extends Thread {
             ArrayList<Integer> neededSquareY = new ArrayList<>();
             for (int i = 0; i < numSqH; i++) {
                 for (int j = 0; j < numSqW; j++) {
-                    if (onTile[i][j]) {
+                    if (!onTile[i][j]) {
                         if ((x - j) * (x - j) == (i - y) * (i - y)) {
                             neededSquareX.add(j);
                             neededSquareY.add(i);
@@ -550,15 +546,15 @@ class DrawThread extends Thread {
             if (nonwaiting) {
                 int index = 0;
                 int dist = (tempX[4] - neededSquareX.get(0)) * (tempX[4] - neededSquareX.get(0)) + (tempY[4] - neededSquareY.get(0)) * (tempY[4] - neededSquareY.get(0));
-                for (int w : neededSquareX) {
-                    int currentIndex = neededSquareX.indexOf(w);
-                    int h = neededSquareY.get(currentIndex);
+                for (int i = 0; i < neededSquareX.size(); i++) {
+                    int w = neededSquareX.get(i);
+                    int h = neededSquareY.get(i);
                     int currentDistance = (tempX[4] - w) * (tempX[4] - w) + (tempY[4] - h) * (tempY[4] - h);
                     if (currentDistance <= dist) {
-                        index = currentIndex;
+                        index = i;
+                        dist = currentDistance;
                     }
                 }
-
                 //where we moving
                 int toSquareX = neededSquareX.get(index);
                 int toSquareY = neededSquareY.get(index);
