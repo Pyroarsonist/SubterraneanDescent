@@ -2,6 +2,7 @@ package com.pyroarsonistapps.subterreneandescent.Core;
 
 
 import android.content.Context;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -61,66 +62,58 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         valueY.add(y);
     }
 
+    private void generateCreature(int identity, int num) {
+        for (int i = 0; i < num; i++) {
+            Random rn = new Random();
+            int cX = rn.nextInt(numSqW);
+            int cY = rn.nextInt(numSqH);
+            if (availableToGenerate[cY][cX]) {
+                initCreature(identity, cY, cX);
+                availableToGenerate[cY][cX] = false;
+            } else {
+                i--;
+            }
+        }
+    }
+
     private void generateMap(int level) {
-        Random rn = new Random();
         for (int i = 1; i < numSqH - 3; i++) {
             for (int j = 1; j < numSqW - 2; j++) {
-                availableToGenerate[i][j] = true;
+                availableToGenerate[i][j] = true; //TODO need check gen
             }
         }
         switch (level) {
+            case 1: {
+                generateCreature(1, 2);
+                break;
+            }
+
             case 2: {
-                //2 goblins
-                for (int i = 0; i < 2; i++) {
-                    int cX = rn.nextInt(numSqW);
-                    int cY = rn.nextInt(numSqH);
-                    if (availableToGenerate[cY][cX]) {
-                        initCreature(1, cY, cX);
-                        availableToGenerate[cY][cX] = false;
-                    } else {
-                        i--;
-                    }
-                }
+                generateCreature(1, 2);
+                generateCreature(2, 1);
+                break;
+            }
+            case 3: {
+                generateCreature(1, 3);
+                generateCreature(2, 1);
+                break;
+            }
+            case 4: {
+                generateCreature(1, 3);
+                generateCreature(2, 2);
+                break;
+            }
+            case 5: {
+                generateCreature(1, 3);
+                generateCreature(2, 2);
+                generateCreature(3, 1);
                 break;
             }
 //CARE!
-            case 1: {
-                //goblin and mage for debug
-                /*for (int i = 0; i < 2; i++) {
-                    int cX = rn.nextInt(numSqW);
-                    int cY = rn.nextInt(numSqH);
-                    if (availableToGenerate[cY][cX]) {
-                        initCreature(1, cY, cX);
-                        availableToGenerate[cY][cX] = false;
-                    } else {
-                        i--;
-                    }
-                }*/
 
-                for (int i = 0; i < 1; i++) {
-                    int cX = rn.nextInt(numSqW);
-                    int cY = rn.nextInt(numSqH);
-                    if (availableToGenerate[cY][cX]) {
-                        initCreature(2, cY, cX);
-                        availableToGenerate[cY][cX] = false;
-                    } else {
-                        i--;
-                    }
-                }
-                for (int i = 0; i < 1; i++) {
-                    int cX = rn.nextInt(numSqW);
-                    int cY = rn.nextInt(numSqH);
-                    if (availableToGenerate[cY][cX]) {
-                        initCreature(3, cY, cX);
-                        availableToGenerate[cY][cX] = false;
-                    } else {
-                        i--;
-                    }
-                }
-                break;
-            }
         }
-    } //TODO generate
+    }
+
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -174,9 +167,6 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void checkGameEnd() {
-       /* if (!heroC.isAlive) {
-            end();
-        }*/
         if (!drawThread.isAlive())
             end(drawThread.getAllEnemiesDead());
     }
@@ -184,21 +174,13 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     public void end(boolean allEnemiesDead) {
         boolean won = allEnemiesDead;
         if (won) {
+            Log.i("dan", "WON LEVEL");
             Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_LONG).show();
-          /*  try {
-                Thread.sleep(Toast.LENGTH_SHORT);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }*/
         } else {
+            Log.i("dan", "LOST LEVEL");
             Toast.makeText(this.getContext(), "You lost...", Toast.LENGTH_LONG).show();
-          /*  try {
-                Thread.sleep(Toast.LENGTH_SHORT);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }*/
         }
         LevelActivity myActivity = (LevelActivity) getContext();
         myActivity.finish();
-    } //TODO giving the HP back
+    } //TODO giving the HP back need assets
 }

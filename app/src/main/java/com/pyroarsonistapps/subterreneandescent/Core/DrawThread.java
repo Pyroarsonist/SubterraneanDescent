@@ -166,13 +166,7 @@ class DrawThread extends Thread {
     }
 
     private void wonGame() {
-        //Log.i("dan", "WON GAME");//TODO winning legshot
-        /*Toast.makeText(this.context, "You won! Congrats!", Toast.LENGTH_SHORT).show();
-        try {
-            this.sleep(Toast.LENGTH_SHORT);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
+        //TODO need smth here
         setRunning(false);
     }
 
@@ -650,8 +644,6 @@ class DrawThread extends Thread {
     }
 
     private void endGame() {
-        //  Log.i("dan", "END OF GAME");
-        Toast.makeText(this.context, "You lost...", Toast.LENGTH_SHORT).show();
         setRunning(false);
     }
 
