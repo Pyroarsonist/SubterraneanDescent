@@ -1,6 +1,7 @@
 package com.pyroarsonistapps.subterreneandescent.Core;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -14,6 +15,9 @@ import com.pyroarsonistapps.subterreneandescent.Logic.Creatures.*;
 import com.pyroarsonistapps.subterreneandescent.R;
 import com.pyroarsonistapps.subterreneandescent.Logic.Square;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -74,6 +78,7 @@ class DrawThread extends Thread {
                 creatures.add(new Mage(valueX.get(i), valueY.get(i)));
                 setOnTile(valueX.get(i), valueY.get(i), true);
             }
+            saveGame();
         }
         heroC = creatures.get(0);
         Log.i("dan", heroC.getCurrentHP() + " HP!");
@@ -85,6 +90,27 @@ class DrawThread extends Thread {
         banned_square = BitmapFactory.decodeResource(context.getResources(), R.drawable.banned_square);
         archer = BitmapFactory.decodeResource(context.getResources(), R.drawable.archer);
         mage = BitmapFactory.decodeResource(context.getResources(), R.drawable.mage);
+    }
+
+    public void saveGame() {//TODO MAKE THIS CODE BRUH
+        saveLevel();
+        saveCreatures();
+    }
+
+
+    private void saveLevel() {
+        int level;
+        String filename = "Saves/Level.txt";
+        AssetManager assetManager = context.getAssets();
+        try {
+            BufferedWriter wr = new BufferedWriter(new FileWriter(filename));
+            wr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveCreatures() {
     }
 
     DrawThread(SurfaceHolder surfaceHolder, Context c, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
@@ -304,6 +330,7 @@ class DrawThread extends Thread {
         checkHeroHarrasing();
         checkEnemyDeath();
         enemyTurn();
+        saveGame();
     }
 
     private void setLastXYArray(Creature c) {

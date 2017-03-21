@@ -1,7 +1,9 @@
 package com.pyroarsonistapps.subterreneandescent.Core;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -10,6 +12,10 @@ import android.widget.Toast;
 
 import com.pyroarsonistapps.subterreneandescent.Logic.Square;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -38,12 +44,17 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         this.heroHP = heroHP;
         this.initMaxHeroHP = initMaxHeroHP;
         getHolder().addCallback(this);
-    }
+        try {
+            Log.i("dan", String.valueOf(getLevelFromAssetFile()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    } //TODO rework
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
-
+            drawThread.saveGame();
     }
 
     @Override
@@ -114,9 +125,31 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    int getLevelFromAssetFile() throws IOException {
+        int level;
+        String filename = "Saves/Level.txt";
+        try {
+            AssetManager assetManager = getContext().getAssets();
+            InputStreamReader is = new InputStreamReader(assetManager.open(filename));
+            BufferedReader in = new BufferedReader(is);
+            String word = in.readLine();
+            in.close();
+            try {
+                level = Integer.parseInt(word);
+            } catch (Exception e) {
+                e.printStackTrace();
+                level = 0;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            level = 0;
+        }
+        return level;
+    }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        drawThread.saveGame();
         boolean retry = true;
         drawThread.setRunning(false);
         while (retry) {
@@ -172,6 +205,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void end(boolean allEnemiesDead) {
+        drawThread.saveGame();
         boolean won = allEnemiesDead;
         if (won) {
             Log.i("dan", "WON LEVEL");
