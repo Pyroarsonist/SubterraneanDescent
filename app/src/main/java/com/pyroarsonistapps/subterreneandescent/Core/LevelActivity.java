@@ -17,9 +17,9 @@ public class LevelActivity extends Activity {
     }
 
     private void initFromIntent() {
-        level = getIntent().getIntExtra("level", 1);
-        heroHP = getIntent().getIntExtra("heroHP", 0);
-        initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", 0);
+        level = 1;
+        heroHP = 3;
+        initMaxHeroHP = 3;
     }
 
 }
