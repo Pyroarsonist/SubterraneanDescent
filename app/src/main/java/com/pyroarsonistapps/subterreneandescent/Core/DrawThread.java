@@ -1,7 +1,7 @@
 package com.pyroarsonistapps.subterreneandescent.Core;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -14,14 +14,27 @@ import android.widget.Toast;
 import com.pyroarsonistapps.subterreneandescent.Logic.Creatures.*;
 import com.pyroarsonistapps.subterreneandescent.R;
 import com.pyroarsonistapps.subterreneandescent.Logic.Square;
+import com.pyroarsonistapps.subterreneandescent.Save;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
 
 
-class DrawThread extends Thread {
+import static com.pyroarsonistapps.subterreneandescent.Core.MainActivity.LEVELSAVE;
+
+
+class DrawThread extends Thread implements Save {
 
     private Bitmap square, suggestingSquare, hero, goblin, stairs, banned_square, mage, archer;
     private Context context;
@@ -30,6 +43,7 @@ class DrawThread extends Thread {
     private Square[][] squares = new Square[numSqH][numSqW]; // [0][0],[0][1]...
     private boolean[][] onTile = new boolean[numSqH][numSqW];
     private boolean allEnemiesDead = false;
+    private int level;
 
     private boolean running = false;
 
@@ -78,7 +92,6 @@ class DrawThread extends Thread {
                 creatures.add(new Mage(valueX.get(i), valueY.get(i)));
                 setOnTile(valueX.get(i), valueY.get(i), true);
             }
-            saveGame();
         }
         heroC = creatures.get(0);
         Log.i("dan", heroC.getCurrentHP() + " HP!");
@@ -90,34 +103,31 @@ class DrawThread extends Thread {
         banned_square = BitmapFactory.decodeResource(context.getResources(), R.drawable.banned_square);
         archer = BitmapFactory.decodeResource(context.getResources(), R.drawable.archer);
         mage = BitmapFactory.decodeResource(context.getResources(), R.drawable.mage);
+        saveGame(context, level, creatures);
     }
 
-    public void saveGame() {//TODO MAKE THIS CODE BRUH
-        saveLevel();
-        saveCreatures();
-    }
+    public void saveGame(Context context, int level, ArrayList<Creature> creatures) {
+        createSave(context, level, creatures);
+        //TEST
 
-
-    private void saveLevel() {
-        int level;
-        String filename = "Saves/Level.txt";
-        AssetManager assetManager = context.getAssets();
         try {
-            BufferedWriter wr = new BufferedWriter(new FileWriter(filename));
-            wr.close();
+            Log.i("dan", "getSave: " + getSave(context));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        /*try {
+           // Log.i("dan", "parseFromSaveFile: "+String.valueOf(parseFromSaveFile(context, creatures))); TODO HARDCORE
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 
-    private void saveCreatures() {
-    }
-
-    DrawThread(SurfaceHolder surfaceHolder, Context c, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
+    DrawThread(SurfaceHolder surfaceHolder, Context c, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY, int level) {
         this.surfaceHolder = surfaceHolder;
         initHeroHP = HeroHP;
         this.initMaxHeroHP = initMaxHeroHP;
         context = c;
+        this.level = level;
         init(identities, valueX, valueY);
     }
 
@@ -330,7 +340,7 @@ class DrawThread extends Thread {
         checkHeroHarrasing();
         checkEnemyDeath();
         enemyTurn();
-        saveGame();
+        saveGame(context, level, creatures);
     }
 
     private void setLastXYArray(Creature c) {
@@ -704,5 +714,152 @@ class DrawThread extends Thread {
 
     public boolean getAllEnemiesDead() {
         return allEnemiesDead;
+    }
+
+    @Override
+    public void createSave(Context context, int level, ArrayList<Creature> creatures) {
+        final String filename = LEVELSAVE;
+        File file = new File(context.getFilesDir(), filename);
+        StringBuilder sb = new StringBuilder();
+        sb.append(level);
+        if (level != 0 & creatures != null) {
+            sb.append("\n");
+            for (int i = 0; i < creatures.size(); i++) {
+                //iteration for i'th creature
+                Creature c = creatures.get(i);
+                String identity = c.getIdentity() + " ";
+                String currentHP = c.getCurrentHP() + " ";
+                String HP = c.getHP() + " ";
+                String x = c.getX() + " ";
+                String y = c.getY() + " ";
+                String vector = c.getVector() + " ";
+                String lastX = "";
+                for (int j = 0; j < c.getLastX().length; j++) {
+                    lastX += c.getLastX()[j];
+                }
+                lastX += " ";
+                String lastY = "";
+                for (int j = 0; j < c.getLastY().length; j++) {
+                    lastY += c.getLastY()[j];
+                }
+                lastY += " ";
+                String isAlive = (c.getAlive()) ? "1" : "0";
+                StringBuilder creatureProperty = new StringBuilder();
+                creatureProperty.append(identity);
+                creatureProperty.append(currentHP);
+                creatureProperty.append(HP);
+                creatureProperty.append(x);
+                creatureProperty.append(y);
+                creatureProperty.append(vector);
+                creatureProperty.append(lastX);
+                creatureProperty.append(lastY);
+                creatureProperty.append(isAlive);
+                sb.append(creatureProperty);
+                sb.append("\n");
+            }
+        }
+        String string = sb.toString();
+        FileOutputStream outputStream;
+        try {
+            outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(string.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public String getSave(Context context) throws IOException {
+        final String filename = LEVELSAVE;
+        try {
+            FileInputStream fis = context.openFileInput(filename);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader bufferedReader = new BufferedReader(isr);
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            return sb.toString();
+        } catch (FileNotFoundException e) {
+            return "";
+        } catch (UnsupportedEncodingException e) {
+            return "";
+        } catch (IOException e) {
+            return "";
+        }
+    }
+
+    @Override
+    public int parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
+        int level;
+        String save = getSave(context);
+        try {
+            Scanner sc = new Scanner(save);
+            String levelString = sc.next();
+            level = Integer.parseInt(levelString);
+            creatures.clear();
+            if (sc.hasNext()) {
+                String identity = sc.next();
+                String currentHP = sc.next();
+                String HP = sc.next();
+                String x = sc.next();
+                String y = sc.next();
+                String vector = sc.next();
+                String lastX = sc.next();
+                String lastY = sc.next();
+                String isAlive = sc.next();
+                saveCreature(creatures, identity, currentHP, HP, x, y, vector, lastX, lastY, isAlive);
+            }
+            Log.i("dan", Arrays.deepToString(creatures.toArray()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            level = 0;
+            Log.i("dan", "Exception from getting level save");
+        }
+        return level;
+    }
+
+    private void saveCreature(ArrayList<Creature> creatures, String identity, String currentHP, String HP, String x, String y, String vector, String lastX, String lastY, String isAlive) {
+        Creature c = new Creature();
+        int identityINT = Integer.parseInt(identity);
+        switch (identityINT) {
+            case 0:
+                c = new Hero();
+                break;
+            case 1:
+                c = new Goblin();
+                break;
+            case 2:
+                c = new Archer();
+                break;
+            case 3:
+                c = new Mage();
+                break;
+        }
+        int currentHPINT = Integer.parseInt(currentHP);
+        int HPINT = Integer.parseInt(HP);
+        int xINT = Integer.parseInt(x);
+        int yINT = Integer.parseInt(y);
+        int vectorINT = Integer.parseInt(vector);
+        int[] lastXINT = new int[9];
+        int[] lastYINT = new int[9];
+        for (int i = 0; i < 9; i++) {
+            lastXINT[i] = Integer.parseInt(lastX.charAt(i) + "");
+            lastYINT[i] = Integer.parseInt(lastY.charAt(i) + "");
+        }
+        boolean isAliveBOOLEAN = (isAlive.equals("1"));
+        c.setCurrentHP(currentHPINT);
+        c.setHP(HPINT);
+        c.setX(xINT);
+        c.setY(yINT);
+        c.setVector(vectorINT);
+        c.setLastX(lastXINT);
+        c.setLastY(lastYINT);
+        c.setAlive(isAliveBOOLEAN);
+        creatures.add(c);
     }
 }

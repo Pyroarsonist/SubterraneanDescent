@@ -7,4 +7,8 @@ public class Mage extends Creature {
         HP = 1;
         currentHP = HP;
     }
+
+    public Mage() {
+        super();
+    }
 }

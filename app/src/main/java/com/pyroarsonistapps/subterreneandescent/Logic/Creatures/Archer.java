@@ -7,4 +7,8 @@ public class Archer extends Creature {
         HP = 1;
         currentHP = HP;
     }
+
+    public Archer() {
+        super();
+    }
 }

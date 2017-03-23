@@ -15,4 +15,8 @@ public class Hero extends Creature {
         HP = 3;
         currentHP = HP;
     }
+
+    public Hero() {
+        super();
+    }
 }

@@ -8,4 +8,8 @@ public class Goblin extends Creature {
         HP = 1;
         currentHP = HP;
     }
+
+    public Goblin() {
+        super();
+    }
 }

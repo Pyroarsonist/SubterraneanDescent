@@ -54,14 +54,14 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
                                int height) {
-            drawThread.saveGame();
+        //drawThread.saveGame();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         initCreature(0, -1, -1);
         generateMap(level);
-        drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY);
+        drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY,level);
         squares = drawThread.getSquares();
         drawThread.setRunning(true);
         drawThread.start();
@@ -149,7 +149,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        drawThread.saveGame();
+        //drawThread.saveGame();
         boolean retry = true;
         drawThread.setRunning(false);
         while (retry) {
@@ -205,7 +205,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void end(boolean allEnemiesDead) {
-        drawThread.saveGame();
+        //drawThread.saveGame();
         boolean won = allEnemiesDead;
         if (won) {
             Log.i("dan", "WON LEVEL");

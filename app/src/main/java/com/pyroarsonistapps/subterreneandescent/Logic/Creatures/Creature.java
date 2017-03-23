@@ -1,6 +1,6 @@
 package com.pyroarsonistapps.subterreneandescent.Logic.Creatures;
 
-public abstract class Creature {
+public class Creature {
     protected int identity;
     protected int HP;
     protected int currentHP;
@@ -18,6 +18,12 @@ public abstract class Creature {
         this.x = x;
         this.y = y;
     }
+
+
+    public Creature() {
+
+    }
+
 
     public int getCurrentHP() {
         return currentHP;

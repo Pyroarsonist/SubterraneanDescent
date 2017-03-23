@@ -4,7 +4,6 @@ package com.pyroarsonistapps.subterreneandescent.Core;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,21 +11,20 @@ import android.widget.Button;
 
 import com.pyroarsonistapps.subterreneandescent.Logic.Creatures.Creature;
 import com.pyroarsonistapps.subterreneandescent.R;
+import com.pyroarsonistapps.subterreneandescent.Save;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements Save {
     public static final String LEVELSAVE = "saves.txt";
     private int level = 1;
     private int heroHP;
@@ -40,7 +38,7 @@ public class MainActivity extends Activity {
         startNewGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createSave(MainActivity.this, 0, null);  //TODO use if else statement later to check if save exists
+                //createSave(MainActivity.this, 0, null);  //TODO use if else statement later to check if save exists
                 Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);
                 MainActivity.this.startActivity(myIntent);
             }
@@ -49,13 +47,8 @@ public class MainActivity extends Activity {
         //TEST
 
         try {
-            Log.i("dan", getSave(this));
+            Log.i("dan", "getSave: "+getSave(this));
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            Log.i("dan", String.valueOf(getLevelFromSaveFile(this)));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -63,10 +56,10 @@ public class MainActivity extends Activity {
 
     }
 
-    int getLevelFromSaveFile(Activity activity) throws IOException {
+    @Override
+    public int parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
         int level;
-        String filename = LEVELSAVE;
-        String save = getSave(activity);
+        String save = getSave(context);
         try {
             level = Integer.parseInt(save);
         } catch (Exception e) {
@@ -77,8 +70,8 @@ public class MainActivity extends Activity {
         return level;
     }
 
-    public void createSave(Activity activity, int level, ArrayList<Creature> creatures) {
-        Context context = activity.getApplicationContext();
+    @Override
+    public void createSave(Context context, int level, ArrayList<Creature> creatures) {
         final String filename = LEVELSAVE;
         File file = new File(context.getFilesDir(), filename);
         StringBuilder sb = new StringBuilder();
@@ -131,8 +124,8 @@ public class MainActivity extends Activity {
     }
 
 
-    public String getSave(Activity activity) throws IOException {
-        Context context = activity.getApplicationContext();
+    @Override
+    public String getSave(Context context) throws IOException {
         final String filename = LEVELSAVE;
         try {
             FileInputStream fis = context.openFileInput(filename);
@@ -153,6 +146,7 @@ public class MainActivity extends Activity {
             return "";
         }
     }
+
 
 
 }
