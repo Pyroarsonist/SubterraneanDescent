@@ -1,8 +1,5 @@
-package com.pyroarsonistapps.subterreneandescent.Logic;
+package com.pyroarsonistapps.subterraneandescent.Logic;
 
-/**
- * Created by Даня on 11.02.2017.
- */
 
 public class Square {
     //(x,y) - top left

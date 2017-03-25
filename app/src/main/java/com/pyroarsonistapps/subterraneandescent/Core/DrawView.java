@@ -1,4 +1,4 @@
-package com.pyroarsonistapps.subterreneandescent.Core;
+package com.pyroarsonistapps.subterraneandescent.Core;
 
 
 import android.app.Activity;
@@ -10,7 +10,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterreneandescent.Logic.Square;
+import com.pyroarsonistapps.subterraneandescent.Logic.Square;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

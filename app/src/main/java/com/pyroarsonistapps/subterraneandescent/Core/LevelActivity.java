@@ -1,4 +1,4 @@
-package com.pyroarsonistapps.subterreneandescent.Core;
+package com.pyroarsonistapps.subterraneandescent.Core;
 
 import android.app.Activity;
 import android.os.Bundle;

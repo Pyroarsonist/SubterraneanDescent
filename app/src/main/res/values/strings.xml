@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">Subterrenean Descent</string>
+    <string name="app_name">Subterranean Descent</string>
+    <string name="start_new_game">Start new game</string>
+    <string name="continue_game">Continue game</string>
+    <string name="about">About</string>
+
+    <string name="question_alert">You haven\'t finished old game yet.</string>
+    <string name="start_new_game_answer">Start new game</string>
+    <string name="continue_answer">Continue old game</string>
 </resources>

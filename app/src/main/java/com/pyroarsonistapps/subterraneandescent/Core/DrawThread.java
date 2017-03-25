@@ -1,6 +1,5 @@
-package com.pyroarsonistapps.subterreneandescent.Core;
+package com.pyroarsonistapps.subterraneandescent.Core;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,27 +10,24 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterreneandescent.Logic.Creatures.*;
-import com.pyroarsonistapps.subterreneandescent.R;
-import com.pyroarsonistapps.subterreneandescent.Logic.Square;
-import com.pyroarsonistapps.subterreneandescent.Save;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.*;
+import com.pyroarsonistapps.subterraneandescent.Logic.Square;
+import com.pyroarsonistapps.subterraneandescent.R;
+import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
-
-import static com.pyroarsonistapps.subterreneandescent.Core.MainActivity.LEVELSAVE;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.LEVELSAVE;
 
 
 class DrawThread extends Thread implements Save {
@@ -720,6 +716,7 @@ class DrawThread extends Thread implements Save {
     public void createSave(Context context, int level, ArrayList<Creature> creatures) {
         final String filename = LEVELSAVE;
         File file = new File(context.getFilesDir(), filename);
+        Log.i("dan", "createSave: " + file.exists());
         StringBuilder sb = new StringBuilder();
         sb.append(level);
         if (level != 0 & creatures != null) {

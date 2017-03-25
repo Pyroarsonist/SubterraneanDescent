@@ -1,17 +1,19 @@
-package com.pyroarsonistapps.subterreneandescent.Core;
+package com.pyroarsonistapps.subterraneandescent.Core;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.pyroarsonistapps.subterreneandescent.Logic.Creatures.Creature;
-import com.pyroarsonistapps.subterreneandescent.R;
-import com.pyroarsonistapps.subterreneandescent.Save;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.R;
+import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,31 +31,76 @@ public class MainActivity extends Activity implements Save {
     private int level = 1;
     private int heroHP;
     private int initMaxHeroHP;
+    AlertDialog.Builder continueGameOrNot;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         setContentView(R.layout.activity_main);
+        setDialog();
         Button startNewGame = (Button) findViewById(R.id.start_new_game);
+        Button continueGame = (Button) findViewById(R.id.continue_game);
+        final boolean canContinue = checkExistingOfSaveFile();
+        continueGame.setEnabled(canContinue);
         startNewGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //createSave(MainActivity.this, 0, null);  //TODO use if else statement later to check if save exists
-                Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);
-                MainActivity.this.startActivity(myIntent);
+                if (canContinue)
+                    continueGameOrNot.show();
+                else
+                    //createSave(MainActivity.this, 0, null);  //TODO use if else statement later to check if save exists
+                    startLevelActivity();
             }
+
+
         });
 
         //TEST
 
         try {
-            Log.i("dan", "getSave: "+getSave(this));
+            Log.i("dan", "getSave: " + getSave(this));
 
         } catch (IOException e) {
             e.printStackTrace();
         }
         Log.i("dan", Arrays.deepToString(this.fileList()));
+    }
 
+    private void startLevelActivity() {
+        Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);
+        MainActivity.this.startActivity(myIntent);
+    }
+
+    private void setDialog() {
+        String message = getResources().getString(R.string.question_alert);
+        String yesString = getResources().getString(R.string.start_new_game_answer);
+        String noString = getResources().getString(R.string.continue_answer);
+
+        continueGameOrNot = new AlertDialog.Builder(this);
+        continueGameOrNot.setMessage(message); // сообщение
+        continueGameOrNot.setPositiveButton(yesString, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                Log.i("dan", "onClick: " + "true");
+                startLevelActivity();
+            }
+        });
+        continueGameOrNot.setNegativeButton(noString, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                Log.i("dan", "onClick: " + "false");
+            }
+        });
+        continueGameOrNot.setCancelable(true);
+        continueGameOrNot.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            public void onCancel(DialogInterface dialog) {
+                Log.i("dan", "onClick: " + "cancel");
+            }
+        });
     }
 
     @Override
@@ -74,6 +121,7 @@ public class MainActivity extends Activity implements Save {
     public void createSave(Context context, int level, ArrayList<Creature> creatures) {
         final String filename = LEVELSAVE;
         File file = new File(context.getFilesDir(), filename);
+        Log.i("dan", "createSave: " + file.exists());
         StringBuilder sb = new StringBuilder();
         sb.append(level);
         if (level != 0 & creatures != null) {
@@ -147,6 +195,9 @@ public class MainActivity extends Activity implements Save {
         }
     }
 
-
-
+    private boolean checkExistingOfSaveFile() {
+        File f = new File(getApplicationContext().getFilesDir(), LEVELSAVE);
+        Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
+        return f.exists();
+    }
 }

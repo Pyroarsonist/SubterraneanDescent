@@ -1,4 +1,4 @@
-package com.pyroarsonistapps.subterreneandescent.Logic.Creatures;
+package com.pyroarsonistapps.subterraneandescent.Logic.Creatures;
 
 public class Archer extends Creature {
     public  Archer(int x, int y) {

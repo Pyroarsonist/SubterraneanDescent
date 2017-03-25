@@ -1,4 +1,4 @@
-package com.pyroarsonistapps.subterreneandescent.Logic.Creatures;
+package com.pyroarsonistapps.subterraneandescent.Logic.Creatures;
 
 public class Hero extends Creature {
 
