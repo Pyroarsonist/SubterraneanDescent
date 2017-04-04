@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.LEVELSAVE;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.LEVELSAVEFILE;
 
 
 class DrawThread extends Thread implements Save {
@@ -714,7 +714,7 @@ class DrawThread extends Thread implements Save {
 
     @Override
     public void createSave(Context context, int level, ArrayList<Creature> creatures) {
-        final String filename = LEVELSAVE;
+        final String filename = LEVELSAVEFILE;
         File file = new File(context.getFilesDir(), filename);
         Log.i("dan", "createSave: " + file.exists());
         StringBuilder sb = new StringBuilder();
@@ -769,7 +769,7 @@ class DrawThread extends Thread implements Save {
 
     @Override
     public String getSave(Context context) throws IOException {
-        final String filename = LEVELSAVE;
+        final String filename = LEVELSAVEFILE;
         try {
             FileInputStream fis = context.openFileInput(filename);
             InputStreamReader isr = new InputStreamReader(fis);
@@ -858,5 +858,9 @@ class DrawThread extends Thread implements Save {
         c.setLastY(lastYINT);
         c.setAlive(isAliveBOOLEAN);
         creatures.add(c);
+    }
+
+    public int getLevel() {
+        return level;
     }
 }

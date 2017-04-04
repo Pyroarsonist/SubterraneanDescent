@@ -36,6 +36,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private int numSqH = 9;
     private int numSqW = 7;
     private boolean[][] availableToGenerate = new boolean[numSqH][numSqW];
+    private boolean continued = true;
 
 
     public DrawView(Context context, int level, int heroHP, int initMaxHeroHP) {
@@ -61,7 +62,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceCreated(SurfaceHolder holder) {
         initCreature(0, -1, -1);
         generateMap(level);
-        drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY,level);
+        drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY, level);
         squares = drawThread.getSquares();
         drawThread.setRunning(true);
         drawThread.start();
@@ -200,19 +201,25 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void checkGameEnd() {
-        if (!drawThread.isAlive())
+        if (!drawThread.isAlive() & continued)
             end(drawThread.getAllEnemiesDead());
     }
 
     public void end(boolean allEnemiesDead) {
-        //drawThread.saveGame();
+        continued = false;
+        drawThread.saveGame(getContext(), drawThread.getLevel(), drawThread.getCreatures());
         boolean won = allEnemiesDead;
         if (won) {
             Log.i("dan", "WON LEVEL");
-            Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_SHORT).show();
         } else {
             Log.i("dan", "LOST LEVEL");
-            Toast.makeText(this.getContext(), "You lost...", Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getContext(), "You lost...", Toast.LENGTH_SHORT).show();
+        }
+        try {
+            drawThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         LevelActivity myActivity = (LevelActivity) getContext();
         myActivity.finish();

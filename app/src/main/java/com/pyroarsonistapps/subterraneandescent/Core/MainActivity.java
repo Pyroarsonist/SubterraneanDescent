@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends Activity implements Save {
-    public static final String LEVELSAVE = "saves.txt";
+    public static final String LEVELSAVEFILE = "saves.txt";
     private int level = 1;
     private int heroHP;
     private int initMaxHeroHP;
@@ -55,7 +55,7 @@ public class MainActivity extends Activity implements Save {
                     continueGameOrNot.show();
                 else
                     //createSave(MainActivity.this, 0, null);  //TODO use if else statement later to check if save exists
-                    startLevelActivity();
+                    startLevelActivity(true);
             }
 
 
@@ -72,8 +72,9 @@ public class MainActivity extends Activity implements Save {
         Log.i("dan", Arrays.deepToString(this.fileList()));
     }
 
-    private void startLevelActivity() {
+    private void startLevelActivity(boolean startNewGame) {
         Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);
+        myIntent.putExtra("needToGetSave", !startNewGame);
         MainActivity.this.startActivity(myIntent);
     }
 
@@ -86,19 +87,17 @@ public class MainActivity extends Activity implements Save {
         continueGameOrNot.setMessage(message); // сообщение
         continueGameOrNot.setPositiveButton(yesString, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
-                Log.i("dan", "onClick: " + "true");
-                startLevelActivity();
+                startLevelActivity(true);
             }
         });
         continueGameOrNot.setNegativeButton(noString, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
-                Log.i("dan", "onClick: " + "false");
+                startLevelActivity(false);
             }
         });
         continueGameOrNot.setCancelable(true);
         continueGameOrNot.setOnCancelListener(new DialogInterface.OnCancelListener() {
             public void onCancel(DialogInterface dialog) {
-                Log.i("dan", "onClick: " + "cancel");
             }
         });
     }
@@ -119,7 +118,7 @@ public class MainActivity extends Activity implements Save {
 
     @Override
     public void createSave(Context context, int level, ArrayList<Creature> creatures) {
-        final String filename = LEVELSAVE;
+        final String filename = LEVELSAVEFILE;
         File file = new File(context.getFilesDir(), filename);
         Log.i("dan", "createSave: " + file.exists());
         StringBuilder sb = new StringBuilder();
@@ -174,7 +173,7 @@ public class MainActivity extends Activity implements Save {
 
     @Override
     public String getSave(Context context) throws IOException {
-        final String filename = LEVELSAVE;
+        final String filename = LEVELSAVEFILE;
         try {
             FileInputStream fis = context.openFileInput(filename);
             InputStreamReader isr = new InputStreamReader(fis);
@@ -196,7 +195,7 @@ public class MainActivity extends Activity implements Save {
     }
 
     private boolean checkExistingOfSaveFile() {
-        File f = new File(getApplicationContext().getFilesDir(), LEVELSAVE);
+        File f = new File(getApplicationContext().getFilesDir(), LEVELSAVEFILE);
         Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
         return f.exists();
     }
