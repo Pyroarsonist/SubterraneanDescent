@@ -10,6 +10,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
 import com.pyroarsonistapps.subterraneandescent.Logic.Square;
 
 import java.io.BufferedReader;
@@ -22,6 +23,7 @@ import java.util.Random;
 
 class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
+    private ArrayList<Creature> creatures;
     private DrawThread drawThread;
     private int level;
     private int heroHP;
@@ -38,19 +40,25 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private boolean[][] availableToGenerate = new boolean[numSqH][numSqW];
     private boolean continued = true;
 
+    private boolean needGenerate = true;
+
 
     public DrawView(Context context, int level, int heroHP, int initMaxHeroHP) {
         super(context);
         this.level = level;
         this.heroHP = heroHP;
         this.initMaxHeroHP = initMaxHeroHP;
+        needGenerate = true;
         getHolder().addCallback(this);
-        try {
-            Log.i("dan", String.valueOf(getLevelFromAssetFile()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     } //TODO rework
+
+    public DrawView(Context context, int level, ArrayList<Creature> creatures) {
+        super(context);
+        this.level = level;
+        needGenerate = false;
+        this.creatures = creatures;
+        getHolder().addCallback(this);
+    }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
@@ -60,9 +68,13 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        initCreature(0, -1, -1);
-        generateMap(level);
-        drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY, level);
+        if (needGenerate) {
+            initCreature(0, -1, -1);
+            generateMap(level);
+            drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY, level);
+        } else {
+            drawThread = new DrawThread(getHolder(), getContext(), level, creatures, needGenerate);
+        }
         squares = drawThread.getSquares();
         drawThread.setRunning(true);
         drawThread.start();
@@ -124,28 +136,6 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 //CARE!
 
         }
-    }
-
-    int getLevelFromAssetFile() throws IOException {
-        int level;
-        String filename = "Saves/Level.txt";
-        try {
-            AssetManager assetManager = getContext().getAssets();
-            InputStreamReader is = new InputStreamReader(assetManager.open(filename));
-            BufferedReader in = new BufferedReader(is);
-            String word = in.readLine();
-            in.close();
-            try {
-                level = Integer.parseInt(word);
-            } catch (Exception e) {
-                e.printStackTrace();
-                level = 0;
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            level = 0;
-        }
-        return level;
     }
 
     @Override

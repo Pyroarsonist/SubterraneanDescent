@@ -58,35 +58,55 @@ class DrawThread extends Thread implements Save {
 
     private SurfaceHolder surfaceHolder;
 
-    private int possibleMovement = 1;
+    private final int possibleMovement = 1;
     private ArrayList<Creature> creatures = new ArrayList<>();
 
     private int canvasW;
     private int canvasH;
     private final int HPsizeText = 110;
 
+    boolean needGenerate = true;
+
 
     private Creature heroC;
 
+    public DrawThread(SurfaceHolder holder, Context context, int level, ArrayList<Creature> creatures, boolean needGenerate) {
+        this.surfaceHolder = holder;
+        this.needGenerate = needGenerate;
+        this.context = context;
+        this.level = level;
+        this.creatures = creatures;
+        Log.i("dan", "lulsx"+creatures.isEmpty());
+        init(null, null, null);
+    }
+
 
     private void init(ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
-        if (initHeroHP == 0 & initMaxHeroHP == 0)
-            creatures.add(new Hero(initHeroX, initHeroY));
-        else
-            creatures.add(new Hero(initHeroX, initHeroY, initHeroHP, initMaxHeroHP));
-        setOnTile(initHeroX, initHeroY, true);
-        for (int i = 1; i < identities.size(); i++) {
-            if (identities.get(i) == 1) {
-                creatures.add(new Goblin(valueX.get(i), valueY.get(i)));
-                setOnTile(valueX.get(i), valueY.get(i), true);
+        if (needGenerate) {
+            if (initHeroHP == 0 & initMaxHeroHP == 0)
+                creatures.add(new Hero(initHeroX, initHeroY));
+            else
+                creatures.add(new Hero(initHeroX, initHeroY, initHeroHP, initMaxHeroHP));
+            setOnTile(initHeroX, initHeroY, true);
+            for (int i = 1; i < identities.size(); i++) {
+                if (identities.get(i) == 1) {
+                    creatures.add(new Goblin(valueX.get(i), valueY.get(i)));
+                    setOnTile(valueX.get(i), valueY.get(i), true);
+                }
+                if (identities.get(i) == 2) {
+                    creatures.add(new Archer(valueX.get(i), valueY.get(i)));
+                    setOnTile(valueX.get(i), valueY.get(i), true);
+                }
+                if (identities.get(i) == 3) {
+                    creatures.add(new Mage(valueX.get(i), valueY.get(i)));
+                    setOnTile(valueX.get(i), valueY.get(i), true);
+                }
             }
-            if (identities.get(i) == 2) {
-                creatures.add(new Archer(valueX.get(i), valueY.get(i)));
-                setOnTile(valueX.get(i), valueY.get(i), true);
-            }
-            if (identities.get(i) == 3) {
-                creatures.add(new Mage(valueX.get(i), valueY.get(i)));
-                setOnTile(valueX.get(i), valueY.get(i), true);
+        } else {
+            for (int i = 0; i < numSqW; i++) {
+                for (int j = 0; j < numSqH; j++) {
+                    setOnTile(i, j, false);
+                }
             }
         }
         heroC = creatures.get(0);
@@ -118,11 +138,11 @@ class DrawThread extends Thread implements Save {
         }*/
     }
 
-    DrawThread(SurfaceHolder surfaceHolder, Context c, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY, int level) {
+    DrawThread(SurfaceHolder surfaceHolder, Context context, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY, int level) {
         this.surfaceHolder = surfaceHolder;
         initHeroHP = HeroHP;
         this.initMaxHeroHP = initMaxHeroHP;
-        context = c;
+        this.context = context;
         this.level = level;
         init(identities, valueX, valueY);
     }

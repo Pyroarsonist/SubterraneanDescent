@@ -94,4 +94,23 @@ public class Creature {
     }
 
 
+    public void setLastX(int lastX) {
+        int[] arr = new int[9];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = Integer.parseInt(String.valueOf(String.valueOf(lastX).indexOf(i)));
+        }
+        setLastX(arr);
+    }
+
+    public void setLastY(int lastY) {
+        int[] arr = new int[9];
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = Integer.parseInt(String.valueOf(String.valueOf(lastY).indexOf(i)));
+        }
+        setLastY(arr);
+    }
+
+    public void setIdentity(int identity) {
+        this.identity = identity;
+    }
 }

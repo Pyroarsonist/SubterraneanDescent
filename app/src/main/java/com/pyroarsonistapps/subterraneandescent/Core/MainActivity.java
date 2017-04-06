@@ -37,11 +37,6 @@ public class MainActivity extends Activity implements Save {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         setContentView(R.layout.activity_main);
         setDialog();
         Button startNewGame = (Button) findViewById(R.id.start_new_game);
@@ -60,6 +55,12 @@ public class MainActivity extends Activity implements Save {
 
 
         });
+        continueGame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startLevelActivity(false);
+            }
+        });
 
         //TEST
 
@@ -71,6 +72,12 @@ public class MainActivity extends Activity implements Save {
         }
         Log.i("dan", Arrays.deepToString(this.fileList()));
     }
+
+   /* @Override
+    protected void onStart() {
+        super.onStart();
+
+    }*/
 
     private void startLevelActivity(boolean startNewGame) {
         Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);

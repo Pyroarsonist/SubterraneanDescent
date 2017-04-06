@@ -5,7 +5,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Goblin;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Hero;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Mage;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.io.BufferedReader;
@@ -17,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.LEVELSAVEFILE;
@@ -33,14 +38,20 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initFromIntent();
-        setContentView(new DrawView(this, level, heroHP, initMaxHeroHP));
+        if (!needToGetSave)
+            setContentView(new DrawView(this, level, heroHP, initMaxHeroHP));
+        else
+            setContentView(new DrawView(this, level, creatures));
     }
 
     private void initFromIntent() {
         needToGetSave = getIntent().getBooleanExtra("needToGetSave", false);
         if (needToGetSave) {
             try {
-                level = parseFromSaveFile(getApplicationContext(), creatures);
+                Object[] getLevelAndCreatures = parseFromSaveFile(getApplicationContext());
+                level = (int) getLevelAndCreatures[0];
+                creatures = (ArrayList<Creature>) getLevelAndCreatures[1];
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -51,8 +62,9 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
         }
     }
 
-    @Override
-    public int parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
+
+    public Object[] parseFromSaveFile(Context context) throws IOException {  //TODO not working
+        Object[] getLevelAndCreatures = new Object[2];
         int level;
         Scanner sc = new Scanner(getSave(context));
         try {
@@ -60,7 +72,7 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
             if (sc.hasNext()) {
                 creatures = new ArrayList<>();
                 while (sc.hasNext()) {
-                    Creature c;
+                    Creature c = new Creature();
                     int identity = sc.nextInt();
                     int currentHP = sc.nextInt();
                     int HP = sc.nextInt();
@@ -70,7 +82,30 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
                     int lastX = sc.nextInt();
                     int lastY = sc.nextInt();
                     int isAlive = sc.nextInt();
-                    //TODO SWITCH C IDENTITY
+                    Log.i("dan", "iteration check " + identity + " " + currentHP + " " + HP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
+                    switch (identity) {
+                        case 0:
+                            c = new Hero();
+                            break;
+                        case 1:
+                            c = new Goblin();
+                            break;
+                        case 2:
+                            c = new Archer();
+                            break;
+                        case 3:
+                            c = new Mage();
+                            break;
+                    }
+                    c.setIdentity(identity);
+                    c.setCurrentHP(currentHP);
+                    c.setHP(HP);
+                    c.setX(x);
+                    c.setY(y);
+                    c.setVector(vector);
+                    c.setLastX(lastX);
+                    c.setLastY(lastY);
+                    c.setAlive(isAlive == 1);
                     creatures.add(c);
                 }
             }
@@ -80,7 +115,9 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
             creatures = null;
             Log.i("dan", "Exception from getting level save");
         }
-        return level;
+        getLevelAndCreatures[0]=level;
+        getLevelAndCreatures[1]=creatures;
+        return getLevelAndCreatures;
     }
 
     @Override
@@ -159,6 +196,11 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
         } catch (IOException e) {
             return "";
         }
+    }
+
+    @Override
+    public int parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
+        return 0;
     }
 
 }
