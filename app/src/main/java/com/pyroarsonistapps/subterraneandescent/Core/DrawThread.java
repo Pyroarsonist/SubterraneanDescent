@@ -76,7 +76,6 @@ class DrawThread extends Thread implements Save {
         this.context = context;
         this.level = level;
         this.creatures = creatures;
-        Log.i("dan", "lulsx"+creatures.isEmpty());
         init(null, null, null);
     }
 
@@ -127,15 +126,10 @@ class DrawThread extends Thread implements Save {
         //TEST
 
         try {
-            Log.i("dan", "getSave: " + getSave(context));
+            Log.i("dan", "DrawThread getSave: " + getSave(context));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        /*try {
-           // Log.i("dan", "parseFromSaveFile: "+String.valueOf(parseFromSaveFile(context, creatures))); TODO HARDCORE
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
     }
 
     DrawThread(SurfaceHolder surfaceHolder, Context context, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY, int level) {
@@ -700,7 +694,7 @@ class DrawThread extends Thread implements Save {
         setRunning(false);
     }
 
-    private void settingXY9Array(int x, int y, int[] arrX, int[] arrY) {
+    private void settingXY9Array(int x, int y, int[] arrX, int[] arrY) {  //TODO error when parsing
         //      [0] [1] [2]
         //      [3] [4] [5]
         //      [6] [7] [8]
@@ -755,6 +749,7 @@ class DrawThread extends Thread implements Save {
                     lastX += c.getLastX()[j];
                 }
                 lastX += " ";
+                Log.i("dan",lastX+" BAD "+c.getLastX()[0]); //TODO this problem now why getlast == -1
                 String lastY = "";
                 for (int j = 0; j < c.getLastY().length; j++) {
                     lastY += c.getLastY()[j];
@@ -810,37 +805,64 @@ class DrawThread extends Thread implements Save {
         }
     }
 
-    @Override
-    public int parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
+    public Object[] parseFromSaveFile(Context context) throws IOException {
+        Object[] getLevelAndCreatures = new Object[2];
         int level;
-        String save = getSave(context);
+        Scanner sc = new Scanner(getSave(context));
         try {
-            Scanner sc = new Scanner(save);
-            String levelString = sc.next();
-            level = Integer.parseInt(levelString);
-            creatures.clear();
+            level = sc.nextInt();
             if (sc.hasNext()) {
-                String identity = sc.next();
-                String currentHP = sc.next();
-                String HP = sc.next();
-                String x = sc.next();
-                String y = sc.next();
-                String vector = sc.next();
-                String lastX = sc.next();
-                String lastY = sc.next();
-                String isAlive = sc.next();
-                saveCreature(creatures, identity, currentHP, HP, x, y, vector, lastX, lastY, isAlive);
+                creatures = new ArrayList<>();
+                while (sc.hasNext()) {
+                    Creature c = new Creature();
+                    int identity = sc.nextInt();
+                    int currentHP = sc.nextInt();
+                    int HP = sc.nextInt();
+                    int x = sc.nextInt();
+                    int y = sc.nextInt();
+                    int vector = sc.nextInt();
+                    int lastX = sc.nextInt();
+                    int lastY = sc.nextInt();
+                    int isAlive = sc.nextInt();
+                    //Log.i("dan", "iteration check " + identity + " " + currentHP + " " + HP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
+                    switch (identity) {
+                        case 0:
+                            c = new Hero();
+                            break;
+                        case 1:
+                            c = new Goblin();
+                            break;
+                        case 2:
+                            c = new Archer();
+                            break;
+                        case 3:
+                            c = new Mage();
+                            break;
+                    }
+                    c.setIdentity(identity);
+                    c.setCurrentHP(currentHP);
+                    c.setHP(HP);
+                    c.setX(x);
+                    c.setY(y);
+                    c.setVector(vector);
+                    c.setLastX(lastX);
+                    c.setLastY(lastY);
+                    c.setAlive(isAlive == 1);
+                    creatures.add(c);
+                }
             }
-            Log.i("dan", Arrays.deepToString(creatures.toArray()));
         } catch (Exception e) {
             e.printStackTrace();
             level = 0;
+            creatures = null;
             Log.i("dan", "Exception from getting level save");
         }
-        return level;
+        getLevelAndCreatures[0]=level;
+        getLevelAndCreatures[1]=creatures;
+        return getLevelAndCreatures;
     }
 
-    private void saveCreature(ArrayList<Creature> creatures, String identity, String currentHP, String HP, String x, String y, String vector, String lastX, String lastY, String isAlive) {
+    public void saveCreature(ArrayList<Creature> creatures, String identity, String currentHP, String HP, String x, String y, String vector, String lastX, String lastY, String isAlive) {
         Creature c = new Creature();
         int identityINT = Integer.parseInt(identity);
         switch (identityINT) {
@@ -864,9 +886,24 @@ class DrawThread extends Thread implements Save {
         int vectorINT = Integer.parseInt(vector);
         int[] lastXINT = new int[9];
         int[] lastYINT = new int[9];
-        for (int i = 0; i < 9; i++) {
-            lastXINT[i] = Integer.parseInt(lastX.charAt(i) + "");
-            lastYINT[i] = Integer.parseInt(lastY.charAt(i) + "");
+        //TODO need rework parse lastXY
+        int pointer = 0;
+        for (int i = 0; i < lastX.length(); i++) {
+            if (lastX.charAt(i) == '-') {
+                lastXINT[pointer] = -1;
+                i++;
+            }
+            lastXINT[pointer] = Integer.parseInt(lastX.charAt(i) + "");
+            pointer++;
+        }
+        pointer=0;
+        for (int i = 0; i < lastY.length(); i++) {
+            if (lastY.charAt(i) == '-') {
+                lastYINT[pointer] = -1;
+                i++;
+            }
+            lastYINT[pointer] = Integer.parseInt(lastY.charAt(i) + "");
+            pointer++;
         }
         boolean isAliveBOOLEAN = (isAlive.equals("1"));
         c.setCurrentHP(currentHPINT);

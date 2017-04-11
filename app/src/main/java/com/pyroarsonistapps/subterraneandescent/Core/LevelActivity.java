@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.LEVELSAVEFILE;
@@ -63,7 +63,7 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
     }
 
 
-    public Object[] parseFromSaveFile(Context context) throws IOException {  //TODO not working
+    public Object[] parseFromSaveFile(Context context) throws IOException {
         Object[] getLevelAndCreatures = new Object[2];
         int level;
         Scanner sc = new Scanner(getSave(context));
@@ -82,7 +82,7 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
                     int lastX = sc.nextInt();
                     int lastY = sc.nextInt();
                     int isAlive = sc.nextInt();
-                    Log.i("dan", "iteration check " + identity + " " + currentHP + " " + HP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
+                    //Log.i("dan", "iteration check " + identity + " " + currentHP + " " + HP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
                     switch (identity) {
                         case 0:
                             c = new Hero();
@@ -115,8 +115,8 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
             creatures = null;
             Log.i("dan", "Exception from getting level save");
         }
-        getLevelAndCreatures[0]=level;
-        getLevelAndCreatures[1]=creatures;
+        getLevelAndCreatures[0] = level;
+        getLevelAndCreatures[1] = creatures;
         return getLevelAndCreatures;
     }
 
@@ -166,7 +166,7 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
         String string = sb.toString();
         FileOutputStream outputStream;
         try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
             outputStream.write(string.getBytes());
             outputStream.close();
         } catch (Exception e) {
@@ -198,9 +198,46 @@ public class LevelActivity extends Activity implements Save {  //TODO just keep 
         }
     }
 
-    @Override
-    public int parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
-        return 0;
+
+    public void saveCreature(ArrayList<Creature> creatures, String identity, String currentHP, String HP, String x, String y, String vector, String lastX, String lastY, String isAlive) {
+        Creature c = new Creature();
+        int identityINT = Integer.parseInt(identity);
+        switch (identityINT) {
+            case 0:
+                c = new Hero();
+                break;
+            case 1:
+                c = new Goblin();
+                break;
+            case 2:
+                c = new Archer();
+                break;
+            case 3:
+                c = new Mage();
+                break;
+        }
+        int currentHPINT = Integer.parseInt(currentHP);
+        int HPINT = Integer.parseInt(HP);
+        int xINT = Integer.parseInt(x);
+        int yINT = Integer.parseInt(y);
+        int vectorINT = Integer.parseInt(vector);
+        int[] lastXINT = new int[9];
+        int[] lastYINT = new int[9];
+        for (int i = 0; i < 9; i++) {
+            lastXINT[i] = Integer.parseInt(lastX.charAt(i) + "");
+            lastYINT[i] = Integer.parseInt(lastY.charAt(i) + "");
+            Log.i("dan", lastXINT[i] + " its a" + lastX);
+        }
+        boolean isAliveBOOLEAN = (isAlive.equals("1"));
+        c.setCurrentHP(currentHPINT);
+        c.setHP(HPINT);
+        c.setX(xINT);
+        c.setY(yINT);
+        c.setVector(vectorINT);
+        c.setLastX(lastXINT);
+        c.setLastY(lastYINT);
+        c.setAlive(isAliveBOOLEAN);
+        creatures.add(c);
     }
 
 }

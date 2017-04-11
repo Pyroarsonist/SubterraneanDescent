@@ -13,5 +13,7 @@ public interface Save {
 
     String getSave(Context context) throws IOException;
 
-    int parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException;
+    Object[] parseFromSaveFile(Context context) throws IOException;
+
+    void saveCreature(ArrayList<Creature> creatures, String identity, String currentHP, String HP, String x, String y, String vector, String lastX, String lastY, String isAlive);
 }

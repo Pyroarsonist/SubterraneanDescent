@@ -11,7 +11,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Goblin;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Hero;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Mage;
 import com.pyroarsonistapps.subterraneandescent.R;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
@@ -25,8 +29,9 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
-public class MainActivity extends Activity implements Save {
+public class MainActivity extends Activity{
     public static final String LEVELSAVEFILE = "saves.txt";
     private int level = 1;
     private int heroHP;
@@ -38,6 +43,10 @@ public class MainActivity extends Activity implements Save {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+            init();
+    }
+
+    private void init() {
         setDialog();
         Button startNewGame = (Button) findViewById(R.id.start_new_game);
         Button continueGame = (Button) findViewById(R.id.continue_game);
@@ -61,23 +70,13 @@ public class MainActivity extends Activity implements Save {
                 startLevelActivity(false);
             }
         });
-
-        //TEST
-
-        try {
-            Log.i("dan", "getSave: " + getSave(this));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.i("dan", Arrays.deepToString(this.fileList()));
     }
 
-   /* @Override
+    @Override
     protected void onStart() {
         super.onStart();
-
-    }*/
+        init();
+    }
 
     private void startLevelActivity(boolean startNewGame) {
         Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);
@@ -109,101 +108,15 @@ public class MainActivity extends Activity implements Save {
         });
     }
 
-    @Override
-    public int parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
-        int level;
-        String save = getSave(context);
-        try {
-            level = Integer.parseInt(save);
-        } catch (Exception e) {
-            e.printStackTrace();
-            level = 0;
-            Log.i("dan", "Exception from getting level save");
-        }
-        return level;
-    }
-
-    @Override
-    public void createSave(Context context, int level, ArrayList<Creature> creatures) {
-        final String filename = LEVELSAVEFILE;
-        File file = new File(context.getFilesDir(), filename);
-        Log.i("dan", "createSave: " + file.exists());
-        StringBuilder sb = new StringBuilder();
-        sb.append(level);
-        if (level != 0 & creatures != null) {
-            sb.append("\n");
-            for (int i = 0; i < creatures.size(); i++) {
-                //iteration for i'th creature
-                Creature c = creatures.get(i);
-                String identity = c.getIdentity() + " ";
-                String currentHP = c.getCurrentHP() + " ";
-                String HP = c.getHP() + " ";
-                String x = c.getX() + " ";
-                String y = c.getY() + " ";
-                String vector = c.getVector() + " ";
-                String lastX = "";
-                for (int j = 0; j < c.getLastX().length; j++) {
-                    lastX += c.getLastX()[j];
-                }
-                lastX += " ";
-                String lastY = "";
-                for (int j = 0; j < c.getLastY().length; j++) {
-                    lastY += c.getLastY()[j];
-                }
-                lastY += " ";
-                String isAlive = (c.getAlive()) ? "1" : "0";
-                StringBuilder creatureProperty = new StringBuilder();
-                creatureProperty.append(identity);
-                creatureProperty.append(currentHP);
-                creatureProperty.append(HP);
-                creatureProperty.append(x);
-                creatureProperty.append(y);
-                creatureProperty.append(vector);
-                creatureProperty.append(lastX);
-                creatureProperty.append(lastY);
-                creatureProperty.append(isAlive);
-                sb.append(creatureProperty);
-                sb.append("\n");
-            }
-        }
-        String string = sb.toString();
-        FileOutputStream outputStream;
-        try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(string.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @Override
-    public String getSave(Context context) throws IOException {
-        final String filename = LEVELSAVEFILE;
-        try {
-            FileInputStream fis = context.openFileInput(filename);
-            InputStreamReader isr = new InputStreamReader(fis);
-            BufferedReader bufferedReader = new BufferedReader(isr);
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line).append("\n");
-            }
-            sb.deleteCharAt(sb.length() - 1);
-            return sb.toString();
-        } catch (FileNotFoundException e) {
-            return "";
-        } catch (UnsupportedEncodingException e) {
-            return "";
-        } catch (IOException e) {
-            return "";
-        }
-    }
-
     private boolean checkExistingOfSaveFile() {
         File f = new File(getApplicationContext().getFilesDir(), LEVELSAVEFILE);
         Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
         return f.exists();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        System.exit(0);
     }
 }
