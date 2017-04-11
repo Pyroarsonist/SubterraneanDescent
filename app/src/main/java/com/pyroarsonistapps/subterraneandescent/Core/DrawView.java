@@ -24,7 +24,7 @@ import java.util.Random;
 class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     private ArrayList<Creature> creatures;
-    private DrawThread drawThread;
+    protected DrawThread drawThread;
     private int level;
     private int heroHP;
     private int initMaxHeroHP;
@@ -50,7 +50,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         this.initMaxHeroHP = initMaxHeroHP;
         needGenerate = true;
         getHolder().addCallback(this);
-    } //TODO rework
+    }
 
     public DrawView(Context context, int level, ArrayList<Creature> creatures) {
         super(context);
@@ -213,5 +213,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         }
         LevelActivity myActivity = (LevelActivity) getContext();
         myActivity.finish();
-    } //TODO giving the HP back need assets
+    }
+
+
 }

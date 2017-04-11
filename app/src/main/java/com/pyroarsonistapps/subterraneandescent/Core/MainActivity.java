@@ -33,9 +33,6 @@ import java.util.Scanner;
 
 public class MainActivity extends Activity{
     public static final String LEVELSAVEFILE = "saves.txt";
-    private int level = 1;
-    private int heroHP;
-    private int initMaxHeroHP;
     AlertDialog.Builder continueGameOrNot;
 
 
