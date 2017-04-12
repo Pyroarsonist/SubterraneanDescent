@@ -3,7 +3,6 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,28 +10,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Goblin;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Hero;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Mage;
 import com.pyroarsonistapps.subterraneandescent.R;
-import com.pyroarsonistapps.subterraneandescent.Save;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
+
+import static com.pyroarsonistapps.subterraneandescent.Save.LEVELSAVEFILE;
 
 public class MainActivity extends Activity{
-    public static final String LEVELSAVEFILE = "saves.txt";
     AlertDialog.Builder continueGameOrNot;
 
 
@@ -107,7 +91,7 @@ public class MainActivity extends Activity{
 
     private boolean checkExistingOfSaveFile() {
         File f = new File(getApplicationContext().getFilesDir(), LEVELSAVEFILE);
-        Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
+       // Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
         return f.exists();
     }
 

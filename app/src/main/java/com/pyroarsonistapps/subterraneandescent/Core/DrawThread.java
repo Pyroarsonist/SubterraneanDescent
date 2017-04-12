@@ -12,24 +12,17 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.*;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Goblin;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Hero;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Mage;
 import com.pyroarsonistapps.subterraneandescent.Logic.Square;
 import com.pyroarsonistapps.subterraneandescent.R;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
-
-import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.LEVELSAVEFILE;
 
 
 class DrawThread extends Thread {
@@ -68,6 +61,7 @@ class DrawThread extends Thread {
     private int canvasW;
     private int canvasH;
     private final int HPsizeText = 110;
+    private final int LEVELsizeText = 120;
 
     boolean needGenerate = true;
 
@@ -113,7 +107,6 @@ class DrawThread extends Thread {
             }
         }
         heroC = creatures.get(0);
-        Log.i("dan", heroC.getCurrentHP() + " HP!");
         square = BitmapFactory.decodeResource(context.getResources(), R.drawable.square);
         suggestingSquare = BitmapFactory.decodeResource(context.getResources(), R.drawable.suggesting_square);
         hero = BitmapFactory.decodeResource(context.getResources(), R.drawable.hero);
@@ -127,13 +120,11 @@ class DrawThread extends Thread {
 
     public void saveGame(Context context, int level, ArrayList<Creature> creatures) {
         Save.createSave(context, level, creatures);
-        //TEST
-
-        try {
+       /* try {
             Log.i("dan", "DrawThread getSave: " + Save.getSave(context));
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     DrawThread(SurfaceHolder surfaceHolder, Context context, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY, int level) {
@@ -176,36 +167,38 @@ class DrawThread extends Thread {
     public void run() {
         Canvas canvas;
         while (running) {
-                if (repaint) {
-                    canvas = null;
-                    try {
-                        canvas = surfaceHolder.lockCanvas(null);
-                        if (canvas == null)
-                            continue;
-                        setCanvasProps(canvas);
-                        setSquareMap(canvas);
-                        putSquareMap(canvas);
-                        stairsPainting(canvas);
-                        creaturePaint(canvas);
-                        suggestMove(canvas);
-                        HPPainting(canvas);
+            if (repaint) {
+                canvas = null;
+                try {
+                    canvas = surfaceHolder.lockCanvas(null);
+                    if (canvas == null)
+                        continue;
+                    setCanvasProps(canvas);
+                    setSquareMap(canvas);
+                    putSquareMap(canvas);
+                    stairsPainting(canvas);
+                    creaturePaint(canvas);
+                    suggestMove(canvas);
+                    HPPainting(canvas);
+                    LevelPainting(canvas);
 
-                        //ending of painting
-                    } finally {
-                        if (canvas != null) {
-                            surfaceHolder.unlockCanvasAndPost(canvas);
-                        }
+                    //ending of painting
+                } finally {
+                    if (canvas != null) {
+                        surfaceHolder.unlockCanvasAndPost(canvas);
                     }
-                    setRepaint(false);
                 }
+                setRepaint(false);
+            }
         }
 
     }
+
     public void createPauseDialog() {
         String pause_title = context.getResources().getString(R.string.pause_title);
         String pause_continue = context.getResources().getString(R.string.pause_continue);
         String pause_exit = context.getResources().getString(R.string.pause_exit);
-        final String[] mPauseStringsNames= {pause_continue,pause_exit};
+        final String[] mPauseStringsNames = {pause_continue, pause_exit};
         pauseDialog = new AlertDialog.Builder(context);
         pauseDialog.setTitle(pause_title);
         pauseDialog.setItems(mPauseStringsNames, new DialogInterface.OnClickListener() {
@@ -218,7 +211,7 @@ class DrawThread extends Thread {
                     }
                     case 1: {
                         //exit to menu
-                        saveGame(context,level,creatures);
+                        saveGame(context, level, creatures);
                         LevelActivity myActivity = (LevelActivity) context;
                         myActivity.finish();
                         break;
@@ -248,19 +241,23 @@ class DrawThread extends Thread {
         setRunning(false);
     }
 
-    private void HPPainting(Canvas canvas) { //TODO rework hp
-        //Log.i("dan", "ENTERED HP");
+    private void HPPainting(Canvas canvas) {
         float h = squares[numSqH - 1][0].getY() + 3 * square.getHeight();
         float w = squares[numSqH - 1][0].getX();
         Paint p = new Paint();
-       /* p.setAntiAlias(true);
-        p.setTextSize(16 * context.getResources().getDisplayMetrics().density);
-        p.setColor(0xFF000000);
-        //p.setColor(Color.RED);*/
-
         p.setColor(Color.RED);
         p.setTextSize(HPsizeText);
         String text = "HP " + heroC.getCurrentHP() + "/" + heroC.getHP();
+        canvas.drawText(text, w, h, p);
+    }
+
+    private void LevelPainting(Canvas canvas) {
+        float h = squares[numSqH - 1][4].getY() + 3 * square.getHeight();
+        float w = squares[numSqH - 1][4].getX();
+        Paint p = new Paint();
+        p.setColor(Color.YELLOW);
+        p.setTextSize(LEVELsizeText);
+        String text = "Level " + level;
         canvas.drawText(text, w, h, p);
     }
 
@@ -512,7 +509,7 @@ class DrawThread extends Thread {
             setVector(tempX[way], tempY[way], g);
             g.setX(tempX[way]);
             g.setY(tempY[way]);
-            Log.i("dan", "MOVING GOBLING: " + tempX[way] + " " + tempY[way]);
+            //Log.i("dan", "MOVING GOBLING: " + tempX[way] + " " + tempY[way]);
             setOnTile(g.getX(), g.getY(), true);
         } else {
             checkGoblinHarrasing(g);
@@ -575,7 +572,7 @@ class DrawThread extends Thread {
             setVector(tempX[way], tempY[way], a);
             a.setX(tempX[way]);
             a.setY(tempY[way]);
-            Log.i("dan", "MOVING ARCHER: " + tempX[way] + " " + tempY[way]);
+            //Log.i("dan", "MOVING ARCHER: " + tempX[way] + " " + tempY[way]);
             setOnTile(a.getX(), a.getY(), true);
         } else {
             checkArcherHarrasing(a);
@@ -637,7 +634,7 @@ class DrawThread extends Thread {
             setVector(tempX[way], tempY[way], m);
             m.setX(tempX[way]);
             m.setY(tempY[way]);
-            Log.i("dan", "MOVING MAGE: " + tempX[way] + " " + tempY[way]);
+            //Log.i("dan", "MOVING MAGE: " + tempX[way] + " " + tempY[way]);
             setOnTile(m.getX(), m.getY(), true);
         } else {
             checkMageHarrasing(m);
@@ -685,14 +682,14 @@ class DrawThread extends Thread {
 
     private void checkArcherHarrasing(Creature a) {
         if (canArcherHarrasing(a)) {
-            Log.i("dan", "ARCHER HARASS from: " + a.getX() + " " + a.getY());
+            //Log.i("dan", "ARCHER HARASS from: " + a.getX() + " " + a.getY());
             decrementHerosHp();
         }
     }
 
     private void checkMageHarrasing(Creature m) {
         if (canMageHarrasing(m)) {
-            Log.i("dan", "MAGE HARASS from: " + m.getX() + " " + m.getY());
+            // Log.i("dan", "MAGE HARASS from: " + m.getX() + " " + m.getY());
             decrementHerosHp();
         }
     }

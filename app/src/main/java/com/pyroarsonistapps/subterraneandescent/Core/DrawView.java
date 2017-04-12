@@ -1,9 +1,7 @@
 package com.pyroarsonistapps.subterraneandescent.Core;
 
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -13,12 +11,12 @@ import android.widget.Toast;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
 import com.pyroarsonistapps.subterraneandescent.Logic.Square;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
+
+import static com.pyroarsonistapps.subterraneandescent.Save.LEVELSAVEFILE;
 
 
 class DrawView extends SurfaceView implements SurfaceHolder.Callback {
@@ -41,6 +39,10 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private boolean continued = true;
 
     private boolean needGenerate = true;
+
+    private  final int MAXLEVEL = 5;
+
+    private boolean won;
 
 
     public DrawView(Context context, int level, int heroHP, int initMaxHeroHP) {
@@ -198,10 +200,22 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     public void end(boolean allEnemiesDead) {
         continued = false;
         drawThread.saveGame(getContext(), drawThread.getLevel(), drawThread.getCreatures());
-        boolean won = allEnemiesDead;
+        won = allEnemiesDead;
         if (won) {
-            Log.i("dan", "WON LEVEL");
-            Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_SHORT).show();
+            level = drawThread.getLevel();
+            Log.i("dan", "WON LEVEL num " + level);
+            if (level == MAXLEVEL) {
+                Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_SHORT).show();
+                String filename = LEVELSAVEFILE;
+                File file = new File(getContext().getFilesDir(), filename);
+                if (file.exists())
+                    file.delete();
+            } else {
+                creatures = drawThread.getCreatures();
+                Creature hero = creatures.get(0);
+                heroHP = hero.getCurrentHP();
+                initMaxHeroHP = hero.getHP();
+            }
         } else {
             Log.i("dan", "LOST LEVEL");
             Toast.makeText(this.getContext(), "You lost...", Toast.LENGTH_SHORT).show();
@@ -215,5 +229,23 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         myActivity.finish();
     }
 
+    public boolean getWon() {
+        return won;
+    }
 
+    public int getLevel() {
+        return level;
+    }
+
+    public int getHeroHP() {
+        return heroHP;
+    }
+
+    public int getInitMaxHeroHP() {
+        return initMaxHeroHP;
+    }
+
+    public  int getMAXLEVEL() {
+        return MAXLEVEL;
+    }
 }

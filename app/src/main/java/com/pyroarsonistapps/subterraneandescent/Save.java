@@ -2,7 +2,6 @@ package com.pyroarsonistapps.subterraneandescent;
 
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
@@ -12,7 +11,6 @@ import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Hero;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Mage;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -22,12 +20,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.LEVELSAVEFILE;
-
 public class Save {
+    public static final String LEVELSAVEFILE = "saves.txt";
+
     public static void createSave(Context context, int level, ArrayList<Creature> creatures) {
         final String filename = LEVELSAVEFILE;
-        File file = new File(context.getFilesDir(), filename);
         StringBuilder sb = new StringBuilder();
         sb.append(level);
         if (level != 0 & creatures != null) {
@@ -36,7 +33,6 @@ public class Save {
                 //iteration for i'th creature
                 Creature c = creatures.get(i);
                 String identity = c.getIdentity() + " ";
-                Log.i("dan", identity + " BAD " + c.getIdentity());
                 String currentHP = c.getCurrentHP() + " ";
                 String HP = c.getHP() + " ";
                 String x = c.getX() + " ";
@@ -118,7 +114,7 @@ public class Save {
                     String lastX = sc.next();
                     String lastY = sc.next();
                     String isAlive = sc.next();
-                    Log.i("dan", "iteration check " + identity + " " + currentHP + " " + HP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
+                    //Log.i("dan", "iteration check " + identity + " " + currentHP + " " + HP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
                     saveCreature(creatures, identity, currentHP, HP, x, y, vector, lastX, lastY, isAlive);
                 }
             }
@@ -138,7 +134,6 @@ public class Save {
                                     String isAlive) {
         Creature c = new Creature();
         int identityINT = Integer.parseInt(identity);
-        Log.i("dan", identity + " " + identityINT + " CHECKING IDENT");
         switch (identityINT) {
             case 0:
                 c = new Hero();
@@ -160,7 +155,6 @@ public class Save {
         int vectorINT = Integer.parseInt(vector);
         int[] lastXINT = new int[9];
         int[] lastYINT = new int[9];
-        //TODO need rework parse lastXY
         int pointer = 0;
         for (int i = 0; i < lastX.length(); i++) {
             if (lastX.charAt(i) == '-') {
