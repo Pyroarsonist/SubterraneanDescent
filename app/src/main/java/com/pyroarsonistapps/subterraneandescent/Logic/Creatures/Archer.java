@@ -9,6 +9,6 @@ public class Archer extends Creature {
     }
 
     public Archer() {
-        super();
+        identity = 2;
     }
 }

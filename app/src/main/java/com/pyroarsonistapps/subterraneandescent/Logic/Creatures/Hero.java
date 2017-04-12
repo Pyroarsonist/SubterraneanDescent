@@ -17,6 +17,6 @@ public class Hero extends Creature {
     }
 
     public Hero() {
-        super();
+        identity = 0;
     }
 }

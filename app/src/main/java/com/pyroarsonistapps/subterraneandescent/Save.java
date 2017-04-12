@@ -28,7 +28,6 @@ public class Save {
     public static void createSave(Context context, int level, ArrayList<Creature> creatures) {
         final String filename = LEVELSAVEFILE;
         File file = new File(context.getFilesDir(), filename);
-        Log.i("dan", "createSave: " + file.exists());
         StringBuilder sb = new StringBuilder();
         sb.append(level);
         if (level != 0 & creatures != null) {
@@ -37,6 +36,7 @@ public class Save {
                 //iteration for i'th creature
                 Creature c = creatures.get(i);
                 String identity = c.getIdentity() + " ";
+                Log.i("dan", identity + " BAD " + c.getIdentity());
                 String currentHP = c.getCurrentHP() + " ";
                 String HP = c.getHP() + " ";
                 String x = c.getX() + " ";
@@ -47,7 +47,6 @@ public class Save {
                     lastX += c.getLastX()[j];
                 }
                 lastX += " ";
-                Log.i("dan",lastX+" BAD "+c.getLastX()[0]); //TODO this problem now why getlast == -1
                 String lastY = "";
                 for (int j = 0; j < c.getLastY().length; j++) {
                     lastY += c.getLastY()[j];
@@ -101,7 +100,7 @@ public class Save {
         }
     }
 
-    public static Object[] parseFromSaveFile(Context context,ArrayList<Creature> creatures) throws IOException {
+    public static Object[] parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
         Object[] getLevelAndCreatures = new Object[2];
         int level;
         Scanner sc = new Scanner(getSave(context));
@@ -110,48 +109,24 @@ public class Save {
             if (sc.hasNext()) {
                 creatures = new ArrayList<>();
                 while (sc.hasNext()) {
-                    Creature c = new Creature();
-                    int identity = sc.nextInt();
-                    int currentHP = sc.nextInt();
-                    int HP = sc.nextInt();
-                    int x = sc.nextInt();
-                    int y = sc.nextInt();
-                    int vector = sc.nextInt();
-                    int lastX = sc.nextInt();
-                    int lastY = sc.nextInt();
-                    int isAlive = sc.nextInt();
-                    //Log.i("dan", "iteration check " + identity + " " + currentHP + " " + HP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
-                    switch (identity) {
-                        case 0:
-                            c = new Hero();
-                            break;
-                        case 1:
-                            c = new Goblin();
-                            break;
-                        case 2:
-                            c = new Archer();
-                            break;
-                        case 3:
-                            c = new Mage();
-                            break;
-                    }
-                    c.setIdentity(identity);
-                    c.setCurrentHP(currentHP);
-                    c.setHP(HP);
-                    c.setX(x);
-                    c.setY(y);
-                    c.setVector(vector);
-                    c.setLastX(lastX);
-                    c.setLastY(lastY);
-                    c.setAlive(isAlive == 1);
-                    creatures.add(c);
+                    String identity = sc.next();
+                    String currentHP = sc.next();
+                    String HP = sc.next();
+                    String x = sc.next();
+                    String y = sc.next();
+                    String vector = sc.next();
+                    String lastX = sc.next();
+                    String lastY = sc.next();
+                    String isAlive = sc.next();
+                    Log.i("dan", "iteration check " + identity + " " + currentHP + " " + HP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
+                    saveCreature(creatures, identity, currentHP, HP, x, y, vector, lastX, lastY, isAlive);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
             level = 0;
             creatures = null;
-            Log.i("dan", "Exception from getting level save");
+            Log.i("dan", "Exception from parsing level save");
         }
         getLevelAndCreatures[0] = level;
         getLevelAndCreatures[1] = creatures;
@@ -163,6 +138,7 @@ public class Save {
                                     String isAlive) {
         Creature c = new Creature();
         int identityINT = Integer.parseInt(identity);
+        Log.i("dan", identity + " " + identityINT + " CHECKING IDENT");
         switch (identityINT) {
             case 0:
                 c = new Hero();
@@ -188,20 +164,20 @@ public class Save {
         int pointer = 0;
         for (int i = 0; i < lastX.length(); i++) {
             if (lastX.charAt(i) == '-') {
-                lastXINT[pointer] = -1;
+                lastXINT[pointer++] = -1;
                 i++;
+                continue;
             }
-            lastXINT[pointer] = Integer.parseInt(lastX.charAt(i) + "");
-            pointer++;
+            lastXINT[pointer++] = Integer.parseInt(lastX.charAt(i) + "");
         }
-        pointer=0;
+        pointer = 0;
         for (int i = 0; i < lastY.length(); i++) {
             if (lastY.charAt(i) == '-') {
-                lastYINT[pointer] = -1;
+                lastYINT[pointer++] = -1;
                 i++;
+                continue;
             }
-            lastYINT[pointer] = Integer.parseInt(lastY.charAt(i) + "");
-            pointer++;
+            lastXINT[pointer++] = Integer.parseInt(lastX.charAt(i) + "");
         }
         boolean isAliveBOOLEAN = (isAlive.equals("1"));
         c.setCurrentHP(currentHPINT);

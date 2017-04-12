@@ -9,6 +9,6 @@ public class Mage extends Creature {
     }
 
     public Mage() {
-        super();
+        identity = 3;
     }
 }
