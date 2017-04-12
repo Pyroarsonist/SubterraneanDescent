@@ -71,7 +71,7 @@ public class LevelActivity extends Activity {
                     e.printStackTrace();
                 }
             } else {
-                level = 5;
+                level = 1;
                 heroHP = 3;
                 initMaxHeroHP = 3;
             }
