@@ -23,8 +23,8 @@ public class MainActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-            init();
+        setContentView(R.layout.loading_screen);
+        //setContentView(R.layout.activity_main);
     }
 
     private void init() {
@@ -56,7 +56,7 @@ public class MainActivity extends Activity{
     @Override
     protected void onStart() {
         super.onStart();
-        init();
+       // init();*/
     }
 
     private void startLevelActivity(boolean startNewGame) {

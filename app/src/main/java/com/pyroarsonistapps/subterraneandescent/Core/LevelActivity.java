@@ -3,14 +3,12 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 
 public class LevelActivity extends Activity {
@@ -51,6 +49,7 @@ public class LevelActivity extends Activity {
             level++;
             heroHP = dv.getHeroHP();
             initMaxHeroHP = dv.getInitMaxHeroHP();
+
             Intent myIntent = new Intent(LevelActivity.this, LevelActivity.class);
             myIntent.putExtra("onNextLevel", level);
             myIntent.putExtra("heroHP", heroHP);
