@@ -82,6 +82,7 @@ public class LevelActivity extends Activity {
     }
 
     private void init() {
+        createSplashActivity(); //TODO need check it out before activities
         level = getIntent().getIntExtra("onNextLevel", -1);
         initFromIntent();
         if (!needToGetSave)
@@ -89,6 +90,11 @@ public class LevelActivity extends Activity {
         else
             dv = new DrawView(this, level, creatures);
         setContentView(dv);
+    }
+
+    private void createSplashActivity() {
+        Intent myIntent = new Intent(LevelActivity.this, LoadingScreen.class);
+        LevelActivity.this.startActivity(myIntent);
     }
 
     @Override
