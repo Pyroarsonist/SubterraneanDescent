@@ -10,5 +10,7 @@ public class Archer extends Creature {
 
     public Archer() {
         identity = 2;
+        HP = 1;
+        currentHP = HP;
     }
 }

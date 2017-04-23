@@ -8,8 +8,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
-import com.pyroarsonistapps.subterraneandescent.Logic.Square;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.*;
 
 
 import java.io.File;
@@ -29,10 +28,6 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     private double targetX, targetY;
 
-    private Square[][] squares;
-    private ArrayList<Integer> identities = new ArrayList<>();
-    public ArrayList<Integer> valueX = new ArrayList<>();//squares
-    public ArrayList<Integer> valueY = new ArrayList<>();
     private int numSqH = 9;
     private int numSqW = 7;
     private boolean[][] availableToGenerate = new boolean[numSqH][numSqW];
@@ -40,7 +35,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     private boolean needGenerate = true;
 
-    private  final int MAXLEVEL = 5;
+    private final int MAXLEVEL = 5;
 
     private boolean won;
 
@@ -51,6 +46,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         this.heroHP = heroHP;
         this.initMaxHeroHP = initMaxHeroHP;
         needGenerate = true;
+        creatures = new ArrayList<>();
         getHolder().addCallback(this);
     }
 
@@ -71,21 +67,38 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         if (needGenerate) {
-            initCreature(0, -1, -1);
+            initHero();
             generateMap(level);
-            drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY, level);
-        } else {
-            drawThread = new DrawThread(getHolder(), getContext(), level, creatures, needGenerate);
         }
-        squares = drawThread.getSquares();
+        drawThread = new DrawThread(getHolder(), getContext(), level, creatures, needGenerate);
         drawThread.setRunning(true);
         drawThread.start();
     }
 
+    private void initHero() {
+        Creature hero = new Hero(DrawThread.initHeroX, DrawThread.initHeroY, heroHP, initMaxHeroHP);
+        creatures.add(hero);
+    }
+
     private void initCreature(int identity, int x, int y) {
-        identities.add(identity);
-        valueX.add(x);
-        valueY.add(y);
+        Creature c =null;
+        switch (identity) {
+            case 0:
+                c = new Hero();
+                break;
+            case 1:
+                c = new Goblin();
+                break;
+            case 2:
+                c = new Archer();
+                break;
+            case 3:
+                c = new Mage();
+                break;
+        }
+        c.setX(x);
+        c.setY(y);
+        creatures.add(c);
     }
 
     private void generateCreature(int identity, int num) {
@@ -245,7 +258,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         return initMaxHeroHP;
     }
 
-    public  int getMAXLEVEL() {
+    public int getMAXLEVEL() {
         return MAXLEVEL;
     }
 }

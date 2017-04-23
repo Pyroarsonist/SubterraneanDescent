@@ -10,5 +10,7 @@ public class Mage extends Creature {
 
     public Mage() {
         identity = 3;
+        HP = 1;
+        currentHP = HP;
     }
 }

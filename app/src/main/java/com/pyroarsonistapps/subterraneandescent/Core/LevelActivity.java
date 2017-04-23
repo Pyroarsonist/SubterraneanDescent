@@ -3,11 +3,8 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.ProgressBar;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
-import com.pyroarsonistapps.subterraneandescent.R;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.io.IOException;
@@ -48,7 +45,7 @@ public class LevelActivity extends Activity {
         if (level == dv.getMAXLEVEL()) { //TODO call results
             return;
         }
-        if (won) { //TODO need loading screen
+        if (won) {
             level++;
             heroHP = dv.getHeroHP();
             initMaxHeroHP = dv.getInitMaxHeroHP();

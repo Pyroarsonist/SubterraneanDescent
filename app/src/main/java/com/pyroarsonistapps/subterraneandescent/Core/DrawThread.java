@@ -29,8 +29,8 @@ class DrawThread extends Thread {
 
     private Bitmap square, suggestingSquare, hero, goblin, stairs, banned_square, mage, archer;
     private Context context;
-    private int numSqH = 9;
-    private int numSqW = 7;
+    public static int numSqH = 9;
+    public static int numSqW = 7;
     private Square[][] squares = new Square[numSqH][numSqW]; // [0][0],[0][1]...
     private boolean[][] onTile = new boolean[numSqH][numSqW];
     private boolean allEnemiesDead = false;
@@ -45,8 +45,8 @@ class DrawThread extends Thread {
     private AlertDialog.Builder pauseDialog;
 
     // hero's x and y == squares x and y
-    private int initHeroX = (numSqW - 1) / 2;
-    private int initHeroY = numSqH - 1;
+    public static int initHeroX = (numSqW - 1) / 2;
+    public static int initHeroY = numSqH - 1;
     private int initHeroHP;
     private int initMaxHeroHP;
 
@@ -74,37 +74,14 @@ class DrawThread extends Thread {
         this.context = context;
         this.level = level;
         this.creatures = creatures;
-        init(null, null, null);
+        init();
     }
 
 
-    private void init(ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
-        if (needGenerate) {
-            if (initHeroHP == 0 & initMaxHeroHP == 0)
-                creatures.add(new Hero(initHeroX, initHeroY));
-            else
-                creatures.add(new Hero(initHeroX, initHeroY, initHeroHP, initMaxHeroHP));
-            setOnTile(initHeroX, initHeroY, true);
-            for (int i = 1; i < identities.size(); i++) {
-                if (identities.get(i) == 1) {
-                    creatures.add(new Goblin(valueX.get(i), valueY.get(i)));
-                    setOnTile(valueX.get(i), valueY.get(i), true);
-                }
-                if (identities.get(i) == 2) {
-                    creatures.add(new Archer(valueX.get(i), valueY.get(i)));
-                    setOnTile(valueX.get(i), valueY.get(i), true);
-                }
-                if (identities.get(i) == 3) {
-                    creatures.add(new Mage(valueX.get(i), valueY.get(i)));
-                    setOnTile(valueX.get(i), valueY.get(i), true);
-                }
-            }
-        } else {
-            for (int i = 0; i < numSqW; i++) {
-                for (int j = 0; j < numSqH; j++) {
-                    setOnTile(i, j, false);
-                }
-            }
+    private void init() {
+        for (Creature c :
+                creatures) {
+            setOnTile(c.getX(), c.getY(), false);
         }
         heroC = creatures.get(0);
         square = BitmapFactory.decodeResource(context.getResources(), R.drawable.square);
@@ -127,14 +104,6 @@ class DrawThread extends Thread {
         }*/
     }
 
-    DrawThread(SurfaceHolder surfaceHolder, Context context, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY, int level) {
-        this.surfaceHolder = surfaceHolder;
-        initHeroHP = HeroHP;
-        this.initMaxHeroHP = initMaxHeroHP;
-        this.context = context;
-        this.level = level;
-        init(identities, valueX, valueY);
-    }
 
     void setPaintSuggestingMoveSquare(boolean painting) {
         paintSuggestingMoveSquare = painting;
@@ -758,4 +727,5 @@ class DrawThread extends Thread {
     public int getLevel() {
         return level;
     }
+
 }
