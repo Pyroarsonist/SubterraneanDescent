@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -16,7 +15,7 @@ import java.io.File;
 
 import static com.pyroarsonistapps.subterraneandescent.Save.LEVELSAVEFILE;
 
-public class MainActivity extends Activity{
+public class MainActivity extends Activity {
     AlertDialog.Builder continueGameOrNot;
 
 
@@ -24,7 +23,6 @@ public class MainActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-            init();
     }
 
     private void init() {
@@ -56,11 +54,11 @@ public class MainActivity extends Activity{
     @Override
     protected void onStart() {
         super.onStart();
-        init();
+         init();
     }
 
     private void startLevelActivity(boolean startNewGame) {
-        Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);
+        Intent myIntent = new Intent(MainActivity.this, LoadingScreen.class);
         myIntent.putExtra("needToGetSave", !startNewGame);
         MainActivity.this.startActivity(myIntent);
     }
@@ -91,7 +89,7 @@ public class MainActivity extends Activity{
 
     private boolean checkExistingOfSaveFile() {
         File f = new File(getApplicationContext().getFilesDir(), LEVELSAVEFILE);
-       // Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
+        // Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
         return f.exists();
     }
 

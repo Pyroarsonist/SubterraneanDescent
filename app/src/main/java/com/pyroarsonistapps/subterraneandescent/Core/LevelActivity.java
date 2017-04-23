@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ProgressBar;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.R;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 
 public class LevelActivity extends Activity {
@@ -51,11 +52,7 @@ public class LevelActivity extends Activity {
             level++;
             heroHP = dv.getHeroHP();
             initMaxHeroHP = dv.getInitMaxHeroHP();
-            Intent myIntent = new Intent(LevelActivity.this, LevelActivity.class);
-            myIntent.putExtra("onNextLevel", level);
-            myIntent.putExtra("heroHP", heroHP);
-            myIntent.putExtra("initMaxHeroHP", initMaxHeroHP);
-            LevelActivity.this.startActivity(myIntent);
+            createSplashActivity();
         }
     }
 
@@ -90,6 +87,14 @@ public class LevelActivity extends Activity {
         else
             dv = new DrawView(this, level, creatures);
         setContentView(dv);
+    }
+
+    private void createSplashActivity() {
+        Intent myIntent = new Intent(LevelActivity.this, LoadingScreen.class);
+        myIntent.putExtra("onNextLevel", level);
+        myIntent.putExtra("heroHP", heroHP);
+        myIntent.putExtra("initMaxHeroHP", initMaxHeroHP);
+        LevelActivity.this.startActivity(myIntent);
     }
 
     @Override
