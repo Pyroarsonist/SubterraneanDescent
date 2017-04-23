@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
     }
 
     private void startLevelActivity(boolean startNewGame) {
-        Intent myIntent = new Intent(MainActivity.this, LevelActivity.class);
+        Intent myIntent = new Intent(MainActivity.this, LoadingScreen.class);
         myIntent.putExtra("needToGetSave", !startNewGame);
         MainActivity.this.startActivity(myIntent);
     }

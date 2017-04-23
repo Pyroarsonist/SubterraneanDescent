@@ -7,16 +7,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="bottom"
-    tools:context="com.pyroarsonistapps.subterraneandescent.Core.MainActivity">
+    tools:context="com.pyroarsonistapps.subterraneandescent.Core.LoadingScreen">
 
     <ProgressBar
-        android:layout_width="wrap_content"
+        android:id="@+id/splash_screen_progress_bar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/imageView"
+        android:indeterminateDrawable="@drawable/spinner"
+        android:indeterminateOnly="true"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="75dp"
-        android:id="@+id/splash_screen_progress_bar" />
+        android:visibility="visible" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -24,7 +27,6 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:contentDescription="App icon"
         android:src="@mipmap/ic_launcher"
         android:visibility="visible" />
 

@@ -3,8 +3,11 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.ProgressBar;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.R;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.io.IOException;
@@ -49,12 +52,7 @@ public class LevelActivity extends Activity {
             level++;
             heroHP = dv.getHeroHP();
             initMaxHeroHP = dv.getInitMaxHeroHP();
-
-            Intent myIntent = new Intent(LevelActivity.this, LevelActivity.class);
-            myIntent.putExtra("onNextLevel", level);
-            myIntent.putExtra("heroHP", heroHP);
-            myIntent.putExtra("initMaxHeroHP", initMaxHeroHP);
-            LevelActivity.this.startActivity(myIntent);
+            createSplashActivity();
         }
     }
 
@@ -82,7 +80,6 @@ public class LevelActivity extends Activity {
     }
 
     private void init() {
-        createSplashActivity(); //TODO need check it out before activities
         level = getIntent().getIntExtra("onNextLevel", -1);
         initFromIntent();
         if (!needToGetSave)
@@ -94,6 +91,9 @@ public class LevelActivity extends Activity {
 
     private void createSplashActivity() {
         Intent myIntent = new Intent(LevelActivity.this, LoadingScreen.class);
+        myIntent.putExtra("onNextLevel", level);
+        myIntent.putExtra("heroHP", heroHP);
+        myIntent.putExtra("initMaxHeroHP", initMaxHeroHP);
         LevelActivity.this.startActivity(myIntent);
     }
 
