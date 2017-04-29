@@ -239,6 +239,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             e.printStackTrace();
         }
         LevelActivity myActivity = (LevelActivity) getContext();
+        myActivity.end();
         myActivity.finish();
     }
 

@@ -302,9 +302,6 @@ class DrawThread extends Thread {
             return false;
     }
 
-    Square[][] getSquares() {
-        return squares;
-    }
 
     int[] getSquareNum(double x, double y) {
         for (int i = 0; i < numSqH; i++) {

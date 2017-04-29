@@ -37,9 +37,7 @@ public class LevelActivity extends Activity {
         needToGetSave = true;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void end() {
         boolean won = dv.getWon();
         level = dv.getLevel();
         if (level == dv.getMAXLEVEL()) { //TODO call results
