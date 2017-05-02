@@ -23,10 +23,12 @@ import java.util.Scanner;
 public class Save {
     public static final String LEVELSAVEFILE = "saves.txt";
 
-    public static void createSave(Context context, int level, ArrayList<Creature> creatures) {
+    public static void createSave(Context context, int level,int turn, ArrayList<Creature> creatures) {
         final String filename = LEVELSAVEFILE;
         StringBuilder sb = new StringBuilder();
         sb.append(level);
+        sb.append("\n");
+        sb.append(turn);
         if (level != 0 & creatures != null) {
             sb.append("\n");
             for (int i = 0; i < creatures.size(); i++) {
@@ -97,11 +99,13 @@ public class Save {
     }
 
     public static Object[] parseFromSaveFile(Context context, ArrayList<Creature> creatures) throws IOException {
-        Object[] getLevelAndCreatures = new Object[2];
+        Object[] getLevelAndTurnAndCreatures = new Object[3];
         int level;
+        int turn;
         Scanner sc = new Scanner(getSave(context));
         try {
             level = sc.nextInt();
+            turn = sc.nextInt();
             if (sc.hasNext()) {
                 creatures = new ArrayList<>();
                 while (sc.hasNext()) {
@@ -121,12 +125,14 @@ public class Save {
         } catch (Exception e) {
             e.printStackTrace();
             level = 0;
+            turn=1;
             creatures = null;
             Log.i("dan", "Exception from parsing level save");
         }
-        getLevelAndCreatures[0] = level;
-        getLevelAndCreatures[1] = creatures;
-        return getLevelAndCreatures;
+        getLevelAndTurnAndCreatures[0] = level;
+        getLevelAndTurnAndCreatures[1] = turn;
+        getLevelAndTurnAndCreatures[2] = creatures;
+        return getLevelAndTurnAndCreatures;
     }
 
     public static void saveCreature(ArrayList<Creature> creatures, String identity, String currentHP,

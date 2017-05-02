@@ -35,6 +35,7 @@ class DrawThread extends Thread {
     private boolean[][] onTile = new boolean[numSqH][numSqW];
     private boolean allEnemiesDead = false;
     private int level;
+    private int turn;
 
     private boolean running = false;
 
@@ -47,8 +48,6 @@ class DrawThread extends Thread {
     // hero's x and y == squares x and y
     public static int initHeroX = (numSqW - 1) / 2;
     public static int initHeroY = numSqH - 1;
-    private int initHeroHP;
-    private int initMaxHeroHP;
 
     private int paintingSuggestingMoveSquareX = initHeroX;
     private int paintingSuggestingMoveSquareY = initHeroY;
@@ -68,11 +67,12 @@ class DrawThread extends Thread {
 
     private Creature heroC;
 
-    public DrawThread(SurfaceHolder holder, Context context, int level, ArrayList<Creature> creatures, boolean needGenerate) {
+    public DrawThread(SurfaceHolder holder, Context context, int level, int turn, ArrayList<Creature> creatures, boolean needGenerate) {
         this.surfaceHolder = holder;
         this.needGenerate = needGenerate;
         this.context = context;
         this.level = level;
+        this.turn = turn;
         this.creatures = creatures;
         init();
     }
@@ -92,12 +92,12 @@ class DrawThread extends Thread {
         banned_square = BitmapFactory.decodeResource(context.getResources(), R.drawable.banned_square);
         archer = BitmapFactory.decodeResource(context.getResources(), R.drawable.archer);
         mage = BitmapFactory.decodeResource(context.getResources(), R.drawable.mage);
-        saveGame(context, level, creatures);
+        saveGame(context, level, turn, creatures);
     }
 
-    public void saveGame(Context context, int level, ArrayList<Creature> creatures) {
-        Save.createSave(context, level, creatures);
-       /* try {
+    public void saveGame(Context context, int level, int turn, ArrayList<Creature> creatures) {
+        Save.createSave(context, level, turn, creatures);
+      /*  try {
             Log.i("dan", "DrawThread getSave: " + Save.getSave(context));
         } catch (IOException e) {
             e.printStackTrace();
@@ -180,7 +180,7 @@ class DrawThread extends Thread {
                     }
                     case 1: {
                         //exit to menu
-                        saveGame(context, level, creatures);
+                        saveGame(context, level, turn, creatures);
                         LevelActivity myActivity = (LevelActivity) context;
                         myActivity.finish();
                         break;
@@ -193,6 +193,7 @@ class DrawThread extends Thread {
     }
 
     private void stairsPainting(Canvas canvas) {
+        checkIfAllAreDead();
         if (allEnemiesDead) {
             int stairsX = (numSqW - 1) / 2;
             int stairsY = 1;
@@ -344,8 +345,15 @@ class DrawThread extends Thread {
         paintSquare(-1, -1);
         checkHeroHarrasing();
         checkEnemyDeath();
+        addTurn();
         enemyTurn();
-        saveGame(context, level, creatures);
+        saveGame(context, level, turn, creatures);
+    }
+
+    private void addTurn() {
+         //  Log.i("dan","turn from : "+turn);
+        turn++;
+          //Log.i("dan","turn to : "+turn);
     }
 
     private void setLastXYArray(Creature c) {
@@ -725,4 +733,7 @@ class DrawThread extends Thread {
         return level;
     }
 
+    public int getTurn() {
+        return turn;
+    }
 }

@@ -23,6 +23,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private ArrayList<Creature> creatures;
     protected DrawThread drawThread;
     private int level;
+    private int turn;
     private int heroHP;
     private int initMaxHeroHP;
 
@@ -40,19 +41,21 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private boolean won;
 
 
-    public DrawView(Context context, int level, int heroHP, int initMaxHeroHP) {
+    public DrawView(Context context, int level, int turn, int heroHP, int initMaxHeroHP) {
         super(context);
         this.level = level;
         this.heroHP = heroHP;
         this.initMaxHeroHP = initMaxHeroHP;
         needGenerate = true;
+        this.turn = turn;
         creatures = new ArrayList<>();
         getHolder().addCallback(this);
     }
 
-    public DrawView(Context context, int level, ArrayList<Creature> creatures) {
+    public DrawView(Context context, int level, int turn, ArrayList<Creature> creatures) {
         super(context);
         this.level = level;
+        this.turn = turn;
         needGenerate = false;
         this.creatures = creatures;
         getHolder().addCallback(this);
@@ -70,7 +73,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             initHero();
             generateMap(level);
         }
-        drawThread = new DrawThread(getHolder(), getContext(), level, creatures, needGenerate);
+        drawThread = new DrawThread(getHolder(), getContext(), level, turn, creatures, needGenerate);
         drawThread.setRunning(true);
         drawThread.start();
     }
@@ -81,7 +84,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void initCreature(int identity, int x, int y) {
-        Creature c =null;
+        Creature c = null;
         switch (identity) {
             case 0:
                 c = new Hero();
@@ -212,7 +215,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     public void end(boolean allEnemiesDead) {
         continued = false;
-        drawThread.saveGame(getContext(), drawThread.getLevel(), drawThread.getCreatures());
+        drawThread.saveGame(getContext(), drawThread.getLevel(), drawThread.getTurn(), drawThread.getCreatures());
         won = allEnemiesDead;
         if (won) {
             level = drawThread.getLevel();

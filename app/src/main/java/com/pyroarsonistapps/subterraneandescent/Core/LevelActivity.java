@@ -3,6 +3,7 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
 import com.pyroarsonistapps.subterraneandescent.Save;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 
 public class LevelActivity extends Activity {
     private int level;
+    private int turn;
     private int heroHP;
     private int initMaxHeroHP;
     private boolean needToGetSave;
@@ -55,21 +57,24 @@ public class LevelActivity extends Activity {
         if (level == -1 | level == 1) {
             if (needToGetSave) {
                 try {
-                    Object[] getLevelAndCreatures = Save.parseFromSaveFile(getApplicationContext(), creatures);
-                    level = (int) getLevelAndCreatures[0];
-                    creatures = (ArrayList<Creature>) getLevelAndCreatures[1];
+                    Object[] getLevelAndTurnAndCreatures = Save.parseFromSaveFile(getApplicationContext(), creatures);
+                    level = (int) getLevelAndTurnAndCreatures[0];
+                    turn = (int) getLevelAndTurnAndCreatures[1];
+                    creatures = (ArrayList<Creature>) getLevelAndTurnAndCreatures[2];
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else {
                 level = 1;
+                turn = 1;
                 heroHP = 3;
                 initMaxHeroHP = 3;
             }
         } else {
             needToGetSave = false;
             heroHP = getIntent().getIntExtra("heroHP", -1);
+            turn = 1;
             initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", -1);
         }
     }
@@ -78,9 +83,9 @@ public class LevelActivity extends Activity {
         level = getIntent().getIntExtra("onNextLevel", -1);
         initFromIntent();
         if (!needToGetSave)
-            dv = new DrawView(this, level, heroHP, initMaxHeroHP);
+            dv = new DrawView(this, level,turn, heroHP, initMaxHeroHP);
         else
-            dv = new DrawView(this, level, creatures);
+            dv = new DrawView(this, level,turn, creatures);
         setContentView(dv);
     }
 
