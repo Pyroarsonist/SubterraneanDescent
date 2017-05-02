@@ -2,6 +2,7 @@ package com.pyroarsonistapps.subterraneandescent;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
@@ -22,8 +23,18 @@ import java.util.Scanner;
 
 public class Save {
     public static final String LEVELSAVEFILE = "saves.txt";
+    public static final String APP_PREFERENCES = "all_data";
+    public static final String APP_PREFERENCES_TURN = "Turn";
 
-    public static void createSave(Context context, int level,int turn, ArrayList<Creature> creatures) {
+    public static void saveTurn(SharedPreferences mSettings) {
+        int turn = mSettings.getInt(APP_PREFERENCES_TURN, 0) + 1;
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt(APP_PREFERENCES_TURN, turn);
+        editor.apply();
+        //Log.i("dan", "allTurns: " + turn);
+    }
+
+    public static void createSave(Context context, int level, int turn, ArrayList<Creature> creatures) {
         final String filename = LEVELSAVEFILE;
         StringBuilder sb = new StringBuilder();
         sb.append(level);
@@ -125,7 +136,7 @@ public class Save {
         } catch (Exception e) {
             e.printStackTrace();
             level = 0;
-            turn=1;
+            turn = 1;
             creatures = null;
             Log.i("dan", "Exception from parsing level save");
         }

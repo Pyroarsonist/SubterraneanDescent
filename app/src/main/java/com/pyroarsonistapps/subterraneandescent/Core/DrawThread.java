@@ -3,6 +3,7 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -351,9 +352,12 @@ class DrawThread extends Thread {
     }
 
     private void addTurn() {
-         //  Log.i("dan","turn from : "+turn);
+        //  Log.i("dan","turn from : "+turn);
         turn++;
-          //Log.i("dan","turn to : "+turn);
+        LevelActivity myActivity = (LevelActivity) context;
+        SharedPreferences mSettings = myActivity.getSettings();
+        Save.saveTurn(mSettings);
+        //Log.i("dan","turn to : "+turn);
     }
 
     private void setLastXYArray(Creature c) {

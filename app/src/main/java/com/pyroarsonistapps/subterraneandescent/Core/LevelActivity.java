@@ -1,7 +1,9 @@
 package com.pyroarsonistapps.subterraneandescent.Core;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -21,10 +23,13 @@ public class LevelActivity extends Activity {
     private ArrayList<Creature> creatures = null;
     private DrawView dv;
 
+    private SharedPreferences mSettings;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         needToGetSave = getIntent().getBooleanExtra("needToGetSave", false);
+        mSettings = getSharedPreferences(Save.APP_PREFERENCES, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -83,9 +88,9 @@ public class LevelActivity extends Activity {
         level = getIntent().getIntExtra("onNextLevel", -1);
         initFromIntent();
         if (!needToGetSave)
-            dv = new DrawView(this, level,turn, heroHP, initMaxHeroHP);
+            dv = new DrawView(this, level, turn, heroHP, initMaxHeroHP);
         else
-            dv = new DrawView(this, level,turn, creatures);
+            dv = new DrawView(this, level, turn, creatures);
         setContentView(dv);
     }
 
@@ -106,5 +111,7 @@ public class LevelActivity extends Activity {
         dv.drawThread.createPauseDialog();
     }
 
-
+    public SharedPreferences getSettings() {
+        return mSettings;
+    }
 }
