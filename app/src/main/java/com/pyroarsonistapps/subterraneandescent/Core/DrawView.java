@@ -2,6 +2,7 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -9,6 +10,7 @@ import android.view.SurfaceView;
 import android.widget.Toast;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.*;
+import com.pyroarsonistapps.subterraneandescent.Save;
 
 
 import java.io.File;
@@ -220,6 +222,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         if (won) {
             level = drawThread.getLevel();
             Log.i("dan", "WON LEVEL num " + level);
+            saveCounterOfWinnedLevels();
             if (level == MAXLEVEL) {
                 Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_SHORT).show();
                 String filename = LEVELSAVEFILE;
@@ -244,6 +247,12 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         LevelActivity myActivity = (LevelActivity) getContext();
         myActivity.end();
         myActivity.finish();
+    }
+
+    private void saveCounterOfWinnedLevels() {
+        LevelActivity myActivity = (LevelActivity) getContext();
+        SharedPreferences mSettings = myActivity.getSettings();
+        Save.saveCounterOfWinnedLevels(mSettings);
     }
 
     public boolean getWon() {

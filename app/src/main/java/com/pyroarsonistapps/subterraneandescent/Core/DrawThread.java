@@ -413,10 +413,17 @@ class DrawThread extends Thread {
                 if (enemy.getCurrentHP() <= 0 & enemy.getAlive()) {
                     setOnTile(enemy.getX(), enemy.getY(), false);
                     enemy.setAlive(false);
+                    saveCounterOFEnemies(enemy);
                 }
             }
         }
         checkIfAllAreDead();
+    }
+
+    private void saveCounterOFEnemies(Creature enemy) {
+        LevelActivity myActivity = (LevelActivity) context;
+        SharedPreferences mSettings = myActivity.getSettings();
+        Save.saveCounterOfEnemies(mSettings, enemy.getIdentity());
     }
 
     private void enemyTurn() {

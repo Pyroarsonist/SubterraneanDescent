@@ -25,6 +25,10 @@ public class Save {
     public static final String LEVELSAVEFILE = "saves.txt";
     public static final String APP_PREFERENCES = "all_data";
     public static final String APP_PREFERENCES_TURN = "Turn";
+    public static final String APP_PREFERENCES_GOBLINS = "GOBLINS";
+    public static final String APP_PREFERENCES_ARCHERS = "ARCHERS";
+    public static final String APP_PREFERENCES_MAGES = "MAGES";
+    public static final String APP_PREFERENCES_WINNEDLEVELS = "Winned levels";
 
     public static void saveTurn(SharedPreferences mSettings) {
         int turn = mSettings.getInt(APP_PREFERENCES_TURN, 0) + 1;
@@ -32,6 +36,37 @@ public class Save {
         editor.putInt(APP_PREFERENCES_TURN, turn);
         editor.apply();
         //Log.i("dan", "allTurns: " + turn);
+    }
+
+    public static void saveCounterOfEnemies(SharedPreferences mSettings, int identity) {
+        String app_preference = null;
+        switch (identity) {
+            case 1: {
+                app_preference = APP_PREFERENCES_GOBLINS;
+                break;
+            }
+            case 2: {
+                app_preference = APP_PREFERENCES_ARCHERS;
+                break;
+            }
+            case 3: {
+                app_preference = APP_PREFERENCES_MAGES;
+                break;
+            }
+        }
+        int counter = mSettings.getInt(app_preference, 0) + 1;
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt(app_preference, counter);
+        editor.apply();
+        //Log.i("dan", app_preference + " and COUNTER: " + counter);
+    }
+
+    public static void saveCounterOfWinnedLevels(SharedPreferences mSettings) {
+        int levels = mSettings.getInt(APP_PREFERENCES_WINNEDLEVELS, 0) + 1;
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt(APP_PREFERENCES_WINNEDLEVELS, levels);
+        editor.apply();
+       // Log.i("dan", "winned levels: " + levels);
     }
 
     public static void createSave(Context context, int level, int turn, ArrayList<Creature> creatures) {
