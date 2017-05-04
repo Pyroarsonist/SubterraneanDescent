@@ -38,7 +38,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     private boolean needGenerate = true;
 
-    private final int MAXLEVEL = 5;
+    private final int MAXLEVEL = 10;
 
     private boolean won;
 
@@ -151,6 +151,36 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
                 generateCreature(1, 3);
                 generateCreature(2, 2);
                 generateCreature(3, 1);
+                break;
+            }
+            case 6: {
+                generateCreature(1, 3);
+                generateCreature(2, 2);
+                generateCreature(3, 2);
+                break;
+            }
+            case 7: {
+                generateCreature(1, 4);
+                generateCreature(2, 2);
+                generateCreature(3, 2);
+                break;
+            }
+            case 8: {
+                generateCreature(1, 4);
+                generateCreature(2, 3);
+                generateCreature(3, 2);
+                break;
+            }
+            case 9: {
+                generateCreature(1, 5);
+                generateCreature(2, 3);
+                generateCreature(3, 2);
+                break;
+            }
+            case 10: {
+                generateCreature(1, 5);
+                generateCreature(2, 3);
+                generateCreature(3, 3);
                 break;
             }
 //CARE!

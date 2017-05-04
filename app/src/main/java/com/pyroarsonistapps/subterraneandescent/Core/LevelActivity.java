@@ -61,7 +61,7 @@ public class LevelActivity extends Activity {
     private void initFromIntent() {
         if (level == -1 | level == 1) {
             if (needToGetSave) {
-                try {
+                try { //from save
                     Object[] getLevelAndTurnAndCreatures = Save.parseFromSaveFile(getApplicationContext(), creatures);
                     level = (int) getLevelAndTurnAndCreatures[0];
                     turn = (int) getLevelAndTurnAndCreatures[1];
@@ -71,13 +71,13 @@ public class LevelActivity extends Activity {
                     e.printStackTrace();
                 }
             } else {
-                level = 1;
+                level = 1; //new game
                 turn = 1;
                 heroHP = 3;
                 initMaxHeroHP = 3;
             }
         } else {
-            needToGetSave = false;
+            needToGetSave = false; //new level
             heroHP = getIntent().getIntExtra("heroHP", -1);
             turn = 1;
             initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", -1);
