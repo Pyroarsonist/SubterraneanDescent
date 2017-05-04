@@ -276,7 +276,6 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         }
         LevelActivity myActivity = (LevelActivity) getContext();
         myActivity.end();
-        myActivity.finish();
     }
 
     private void saveCounterOfWinnedLevels() {

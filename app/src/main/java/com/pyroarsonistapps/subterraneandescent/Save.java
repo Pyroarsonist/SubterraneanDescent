@@ -24,11 +24,14 @@ import java.util.Scanner;
 public class Save {
     public static final String LEVELSAVEFILE = "saves.txt";
     public static final String APP_PREFERENCES = "all_data";
-    public static final String APP_PREFERENCES_TURN = "Turn";
+    public static final String APP_PREFERENCES_TURN = "TURN";
     public static final String APP_PREFERENCES_GOBLINS = "GOBLINS";
     public static final String APP_PREFERENCES_ARCHERS = "ARCHERS";
     public static final String APP_PREFERENCES_MAGES = "MAGES";
-    public static final String APP_PREFERENCES_WINNEDLEVELS = "Winned levels";
+    public static final String APP_PREFERENCES_LEVELS = "LEVELS";
+    public static final String APP_PREFERENCES_WINNED_LEVELS = "WINNED_LEVELS";
+    public static final String APP_PREFERENCES_RESTORED_ABILITY_TAKEN = "RESTORE";
+    public static final String APP_PREFERENCES_OBTAIN_ABILITY_TAKEN = "OBTAIN";
 
     public static void saveTurn(SharedPreferences mSettings) {
         int turn = mSettings.getInt(APP_PREFERENCES_TURN, 0) + 1;
@@ -62,11 +65,33 @@ public class Save {
     }
 
     public static void saveCounterOfWinnedLevels(SharedPreferences mSettings) {
-        int levels = mSettings.getInt(APP_PREFERENCES_WINNEDLEVELS, 0) + 1;
+        int levels = mSettings.getInt(APP_PREFERENCES_WINNED_LEVELS, 0) + 1;
         SharedPreferences.Editor editor = mSettings.edit();
-        editor.putInt(APP_PREFERENCES_WINNEDLEVELS, levels);
+        editor.putInt(APP_PREFERENCES_WINNED_LEVELS, levels);
         editor.apply();
-       // Log.i("dan", "winned levels: " + levels);
+        // Log.i("dan", "winned levels: " + levels);
+    }
+
+    public static void saveCounterOfLevels(SharedPreferences mSettings) {
+        int levels = mSettings.getInt(APP_PREFERENCES_LEVELS, 0) + 1;
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt(APP_PREFERENCES_LEVELS, levels);
+        editor.apply();
+        //Log.i("dan", "levels: " + levels);
+    }
+
+    public static void saveRestored(SharedPreferences mSettings) {
+        int counter = mSettings.getInt(APP_PREFERENCES_RESTORED_ABILITY_TAKEN, 0) + 1;
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt(APP_PREFERENCES_RESTORED_ABILITY_TAKEN, counter);
+        editor.apply();
+    }
+
+    public static void saveObtain(SharedPreferences mSettings) {
+        int counter = mSettings.getInt(APP_PREFERENCES_OBTAIN_ABILITY_TAKEN, 0) + 1;
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt(APP_PREFERENCES_OBTAIN_ABILITY_TAKEN, counter);
+        editor.apply();
     }
 
     public static void createSave(Context context, int level, int turn, ArrayList<Creature> creatures) {

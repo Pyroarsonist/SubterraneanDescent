@@ -64,12 +64,12 @@ public class MainActivity extends Activity {
     }
 
     private void setDialog() {
-        String message = getResources().getString(R.string.question_alert);
-        String yesString = getResources().getString(R.string.start_new_game_answer);
-        String noString = getResources().getString(R.string.continue_answer);
+        final String message = getResources().getString(R.string.question_alert);
+        final String yesString = getResources().getString(R.string.start_new_game_answer);
+        final String noString = getResources().getString(R.string.continue_answer);
 
         continueGameOrNot = new AlertDialog.Builder(this);
-        continueGameOrNot.setMessage(message); // сообщение
+        continueGameOrNot.setMessage(message);
         continueGameOrNot.setPositiveButton(yesString, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
                 startLevelActivity(true);
