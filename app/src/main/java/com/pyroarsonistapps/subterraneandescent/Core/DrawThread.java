@@ -9,11 +9,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 import com.pyroarsonistapps.subterraneandescent.Logic.Square;
 import com.pyroarsonistapps.subterraneandescent.R;
 import com.pyroarsonistapps.subterraneandescent.Save;
@@ -214,7 +213,7 @@ class DrawThread extends Thread {
         Paint p = new Paint();
         p.setColor(Color.RED);
         p.setTextSize(HPsizeText);
-        String text = "HP " + heroC.getCurrentHP() + "/" + heroC.getHP();
+        String text = "HP " + heroC.getCurrentHP() + "/" + heroC.getMaxHP();
         canvas.drawText(text, w, h, p);
     }
 

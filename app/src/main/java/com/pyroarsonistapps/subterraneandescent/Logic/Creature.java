@@ -1,8 +1,8 @@
-package com.pyroarsonistapps.subterraneandescent.Logic.Creatures;
+package com.pyroarsonistapps.subterraneandescent.Logic;
 
 public class Creature {
     protected int identity;
-    protected int HP;
+    protected int maxHP;
     protected int currentHP;
 
     protected int x; //on squares
@@ -14,9 +14,12 @@ public class Creature {
 
     protected boolean isAlive = true;
 
-    public Creature(int x, int y) {
+    public Creature(int x, int y,int currentHP, int maxHP,int identity) {
         this.x = x;
         this.y = y;
+        this.currentHP=currentHP;
+        this.maxHP=maxHP;
+        this.identity=identity;
     }
 
 
@@ -25,12 +28,14 @@ public class Creature {
     }
 
 
+
+
     public int getCurrentHP() {
         return currentHP;
     }
 
-    public int getHP() {
-        return HP;
+    public int getMaxHP() {
+        return maxHP;
     }
 
     public int getX() {
@@ -45,8 +50,8 @@ public class Creature {
         this.currentHP = currentHP;
     }
 
-    public void setHP(int HP) {
-        this.HP = HP;
+    public void setMaxHP(int maxHP) {
+        this.maxHP = maxHP;
     }
 
     public void setX(int x) {

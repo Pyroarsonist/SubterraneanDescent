@@ -5,11 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Goblin;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Hero;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Mage;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -107,7 +103,7 @@ public class Save {
                 Creature c = creatures.get(i);
                 String identity = c.getIdentity() + " ";
                 String currentHP = c.getCurrentHP() + " ";
-                String HP = c.getHP() + " ";
+                String HP = c.getMaxHP() + " ";
                 String x = c.getX() + " ";
                 String y = c.getY() + " ";
                 String vector = c.getVector() + " ";
@@ -211,20 +207,7 @@ public class Save {
                                     String isAlive) {
         Creature c = new Creature();
         int identityINT = Integer.parseInt(identity);
-        switch (identityINT) {
-            case 0:
-                c = new Hero();
-                break;
-            case 1:
-                c = new Goblin();
-                break;
-            case 2:
-                c = new Archer();
-                break;
-            case 3:
-                c = new Mage();
-                break;
-        }
+        c.setIdentity(identityINT);
         int currentHPINT = Integer.parseInt(currentHP);
         int HPINT = Integer.parseInt(HP);
         int xINT = Integer.parseInt(x);
@@ -252,7 +235,7 @@ public class Save {
         }
         boolean isAliveBOOLEAN = (isAlive.equals("1"));
         c.setCurrentHP(currentHPINT);
-        c.setHP(HPINT);
+        c.setMaxHP(HPINT);
         c.setX(xINT);
         c.setY(yINT);
         c.setVector(vectorINT);

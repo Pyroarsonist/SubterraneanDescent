@@ -9,7 +9,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.*;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
 
@@ -81,28 +81,12 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void initHero() {
-        Creature hero = new Hero(DrawThread.initHeroX, DrawThread.initHeroY, heroHP, initMaxHeroHP);
+        Creature hero = new Creature(DrawThread.initHeroX, DrawThread.initHeroY, heroHP, initMaxHeroHP, 0);
         creatures.add(hero);
     }
 
     private void initCreature(int identity, int x, int y) {
-        Creature c = null;
-        switch (identity) {
-            case 0:
-                c = new Hero();
-                break;
-            case 1:
-                c = new Goblin();
-                break;
-            case 2:
-                c = new Archer();
-                break;
-            case 3:
-                c = new Mage();
-                break;
-        }
-        c.setX(x);
-        c.setY(y);
+        Creature c = new Creature(x, y, 1, 1, identity);
         creatures.add(c);
     }
 
@@ -261,7 +245,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
                 creatures = drawThread.getCreatures();
                 Creature hero = creatures.get(0);
                 heroHP = hero.getCurrentHP();
-                initMaxHeroHP = hero.getHP();
+                initMaxHeroHP = hero.getMaxHP();
             }
         } else {
             Log.i("dan", "LOST LEVEL");

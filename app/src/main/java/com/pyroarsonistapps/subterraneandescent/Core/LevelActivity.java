@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 import com.pyroarsonistapps.subterraneandescent.R;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
