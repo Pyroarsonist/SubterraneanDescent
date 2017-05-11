@@ -100,7 +100,7 @@ public class Save {
         sb.append(level);
         sb.append("\n");
         sb.append(turn);
-        if (level != 0 & creatures != null) {
+        if (level != 0 && creatures != null) {
             sb.append("\n");
             for (int i = 0; i < creatures.size(); i++) {
                 //iteration for i'th creature
@@ -113,12 +113,12 @@ public class Save {
                 String vector = c.getVector() + " ";
                 String lastX = "";
                 for (int j = 0; j < c.getLastX().length; j++) {
-                    lastX += c.getLastX()[j];
+                    lastX += c.getLastX()[j]; // TODO dalvik exception here
                 }
                 lastX += " ";
                 String lastY = "";
                 for (int j = 0; j < c.getLastY().length; j++) {
-                    lastY += c.getLastY()[j];
+                    lastY += c.getLastY()[j]; // TODO dalvik exception here
                 }
                 lastY += " ";
                 String isAlive = (c.getAlive()) ? "1" : "0";
@@ -132,7 +132,7 @@ public class Save {
                 creatureProperty.append(lastX);
                 creatureProperty.append(lastY);
                 creatureProperty.append(isAlive);
-                sb.append(creatureProperty);
+                sb.append(creatureProperty); // TODO dalvik exception here
                 sb.append("\n");
             }
         }

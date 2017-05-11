@@ -221,7 +221,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
             if (xy != null) {
                 //Toast.makeText(this.getContext(), xy[0] + " " + xy[1], Toast.LENGTH_SHORT).show();
-                if (drawThread.getPaintingSuggestingMoveSquareX() == xy[0] & drawThread.getPaintingSuggestingMoveSquareY() == xy[1] & drawThread.neighboringTiles(xy[0], xy[1])) {
+                if (drawThread.getPaintingSuggestingMoveSquareX() == xy[0] && drawThread.getPaintingSuggestingMoveSquareY() == xy[1] && drawThread.neighboringTiles(xy[0], xy[1])) {
                     if (!drawThread.getOnTile()[drawThread.getPaintingSuggestingMoveSquareY()][drawThread.getPaintingSuggestingMoveSquareX()])
                         //!drawThread.getBanned()
                         drawThread.moveHero(drawThread.getPaintingSuggestingMoveSquareX(), drawThread.getPaintingSuggestingMoveSquareY());
@@ -241,7 +241,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void checkGameEnd() {
-        if (!drawThread.isAlive() & continued)
+        if (!drawThread.isAlive() && continued)
             end(drawThread.getAllEnemiesDead());
     }
 

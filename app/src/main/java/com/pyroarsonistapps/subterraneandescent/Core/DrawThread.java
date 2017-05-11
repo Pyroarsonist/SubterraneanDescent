@@ -9,20 +9,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Goblin;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Hero;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Mage;
 import com.pyroarsonistapps.subterraneandescent.Logic.Square;
 import com.pyroarsonistapps.subterraneandescent.R;
 import com.pyroarsonistapps.subterraneandescent.Save;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -201,7 +195,7 @@ class DrawThread extends Thread {
             float currX = squares[stairsY][stairsX].getX();
             float currY = squares[stairsY][stairsX].getY();
             canvas.drawBitmap(stairs, currX, currY, null);
-            if (heroC.getX() == stairsX & heroC.getY() == stairsY) {
+            if (heroC.getX() == stairsX && heroC.getY() == stairsY) {
                 wonGame();
             }
         }
@@ -281,8 +275,8 @@ class DrawThread extends Thread {
     }
 
     private void suggestMove(Canvas canvas) {
-        if (paintSuggestingMoveSquare & neighboringTiles(paintingSuggestingMoveSquareX, paintingSuggestingMoveSquareY)) {
-            if (paintingSuggestingMoveSquareX != -1 & paintingSuggestingMoveSquareY != -1) {
+        if (paintSuggestingMoveSquare && neighboringTiles(paintingSuggestingMoveSquareX, paintingSuggestingMoveSquareY)) {
+            if (paintingSuggestingMoveSquareX != -1 && paintingSuggestingMoveSquareY != -1) {
                 Bitmap current;
                 if (!onTile[paintingSuggestingMoveSquareY][paintingSuggestingMoveSquareX]) {
                     current = suggestingSquare;
@@ -298,7 +292,7 @@ class DrawThread extends Thread {
 
 
     boolean neighboringTiles(int x, int y) {
-        if (Math.abs(x - heroC.getX()) <= possibleMovement & Math.abs(y - heroC.getY()) <= possibleMovement) {
+        if (Math.abs(x - heroC.getX()) <= possibleMovement && Math.abs(y - heroC.getY()) <= possibleMovement) {
             return true;
         } else
             return false;
@@ -309,8 +303,8 @@ class DrawThread extends Thread {
         for (int i = 0; i < numSqH; i++) {
             for (int j = 0; j < numSqW; j++) {
                 // Log.i("dan", "CHECKING: " + i + " " + squares[i][j].getX() + " " + j + " " + squares[i][j].getY());
-                if ((x > squares[i][j].getX() & x < squares[i][j].getX() + square.getWidth()) &
-                        (y > squares[i][j].getY() & y < squares[i][j].getY() + square.getHeight())) {
+                if ((x > squares[i][j].getX() && x < squares[i][j].getX() + square.getWidth()) &&
+                        (y > squares[i][j].getY() && y < squares[i][j].getY() + square.getHeight())) {
                     //Log.i("dan", "OKAY: " + i + " " + j);
                     return new int[]{j, i};  //[0]=x; [1]=y;
                 }
@@ -374,7 +368,7 @@ class DrawThread extends Thread {
         settingXY9Array(c.getX(), c.getY(), tempX, tempY);
         int now = 4;
         for (int i = 0; i < 9; i++) {
-            if (x - c.getX() == tempX[i] - tempX[now] & y - c.getY() == tempY[i] - tempY[now]) {
+            if (x - c.getX() == tempX[i] - tempX[now] && y - c.getY() == tempY[i] - tempY[now]) {
                 c.setVector(i);
                 break;
             }
@@ -388,17 +382,17 @@ class DrawThread extends Thread {
         //check vector killing
         for (Creature enemy : creatures) {
             if (enemy.getIdentity() != 0)
-                if (tempX[heroC.getVector()] == enemy.getX() & tempY[heroC.getVector()] == enemy.getY()) {
+                if (tempX[heroC.getVector()] == enemy.getX() && tempY[heroC.getVector()] == enemy.getY()) {
                     enemy.setCurrentHP(enemy.getCurrentHP() - 1);
                 }
         }
         //another
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                if (tempX[i] == heroC.getLastX()[j] & tempY[i] == heroC.getLastY()[j])
+                if (tempX[i] == heroC.getLastX()[j] && tempY[i] == heroC.getLastY()[j])
                     for (Creature enemy : creatures) {
                         if (enemy.getIdentity() != 0)
-                            if (tempX[i] == enemy.getX() & tempY[i] == enemy.getY()) {
+                            if (tempX[i] == enemy.getX() && tempY[i] == enemy.getY()) {
                                 enemy.setCurrentHP(enemy.getCurrentHP() - 1);
                             }
                     }
@@ -410,7 +404,7 @@ class DrawThread extends Thread {
     private void checkEnemyDeath() {
         for (Creature enemy : creatures) {
             if (enemy.getIdentity() != 0) {
-                if (enemy.getCurrentHP() <= 0 & enemy.getAlive()) {
+                if (enemy.getCurrentHP() <= 0 && enemy.getAlive()) {
                     setOnTile(enemy.getX(), enemy.getY(), false);
                     enemy.setAlive(false);
                     saveCounterOFEnemies(enemy);
@@ -444,7 +438,7 @@ class DrawThread extends Thread {
         int dist = (tempX[4] - x) * (tempX[4] - x) + (tempY[4] - y) * (tempY[4] - y);
         int min = 4;
         for (int i = 0; i < 9; i++) {
-            if (tempX[i] == -1 | tempY[i] == -1)
+            if (tempX[i] == -1 || tempY[i] == -1)
                 continue;
             if (onTile[tempY[i]][tempX[i]])
                 continue;
@@ -456,12 +450,12 @@ class DrawThread extends Thread {
         }
         for (Creature c :
                 creatures) {
-            if (tempX[min] == c.getX() & tempY[min] == c.getY())
+            if (tempX[min] == c.getX() && tempY[min] == c.getY())
                 min = 4;
         }
 
         for (int i = 8; i > -1; i--) {
-            if (tempX[i] == -1 | tempY[i] == -1)
+            if (tempX[i] == -1 || tempY[i] == -1)
                 continue;
             if (onTile[tempY[i]][tempX[i]])
                 continue;
@@ -474,7 +468,7 @@ class DrawThread extends Thread {
 
         for (Creature c :
                 creatures) {
-            if (tempX[min] == c.getX() & tempY[min] == c.getY())
+            if (tempX[min] == c.getX() && tempY[min] == c.getY())
                 min = 4;
         }
         return min;
@@ -523,7 +517,7 @@ class DrawThread extends Thread {
             for (int i = 0; i < numSqH; i++) {
                 for (int j = 0; j < numSqW; j++) {
                     if (!onTile[i][j]) {
-                        if (i == y | j == x) {
+                        if (i == y || j == x) {
                             neededSquareX.add(j);
                             neededSquareY.add(i);
                         }
@@ -634,14 +628,14 @@ class DrawThread extends Thread {
         settingXY9Array(g.getX(), g.getY(), tempX, tempY);
         //check vector killing
 
-        /*if (tempX[g.getVector()] == heroC.getX() & tempY[g.getVector()] == heroC.getY()) { //too imbalanced
+        /*if (tempX[g.getVector()] == heroC.getX() && tempY[g.getVector()] == heroC.getY()) { //too imbalanced
             decrementHerosHp();
         }*/
         //another
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                if (tempX[i] == g.getLastX()[j] & tempY[i] == g.getLastY()[j])
-                    if (tempX[i] == heroC.getX() & tempY[i] == heroC.getY()) {
+                if (tempX[i] == g.getLastX()[j] && tempY[i] == g.getLastY()[j])
+                    if (tempX[i] == heroC.getX() && tempY[i] == heroC.getY()) {
                         return true;
                     }
             }
@@ -651,7 +645,7 @@ class DrawThread extends Thread {
 
     private boolean canArcherHarrasing(Creature a) {
         //check x and y of hero
-        return heroC.getX() == a.getX() | heroC.getY() == a.getY();
+        return heroC.getX() == a.getX() || heroC.getY() == a.getY();
     }
 
     private boolean canMageHarrasing(Creature m) {
@@ -725,7 +719,7 @@ class DrawThread extends Thread {
         arrX[7] = x;
         arrX[8] = x + 1;
         for (int i = 0; i < arrX.length; i++) {
-            if (arrX[i] >= numSqW | arrX[i] < 0 | arrY[i] < 0 | arrX[i] >= numSqH) {
+            if (arrX[i] >= numSqW || arrX[i] < 0 || arrY[i] < 0 || arrX[i] >= numSqH) {
                 arrX[i] = -1;
                 arrY[i] = -1;
             }
