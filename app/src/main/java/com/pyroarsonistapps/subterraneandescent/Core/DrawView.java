@@ -215,8 +215,6 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             targetX = event.getX();
             targetY = event.getY();
             // Log.i("dan", "dot: " + targetX + " " + targetY);
-            //drawing = true;
-            //xy[0]=x square xy[1]=y;
             int[] xy = drawThread.getSquareNum(targetX, targetY);
 
             if (xy != null) {

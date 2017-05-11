@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -54,8 +55,9 @@ class DrawThread extends Thread {
 
     private int canvasW;
     private int canvasH;
-    private final int HPsizeText = 110;
-    private final int LEVELsizeText = 120;
+    private  int HPsizeText;
+    private  int LEVELsizeText ;
+    private final int SCALE_FOR_TEXT=20;
 
     boolean needGenerate = true;
 
@@ -254,6 +256,8 @@ class DrawThread extends Thread {
     private void setCanvasProps(Canvas canvas) {
         canvasW = canvas.getWidth();
         canvasH = canvas.getHeight();
+        HPsizeText= canvasH/SCALE_FOR_TEXT;
+        LEVELsizeText= canvasH/SCALE_FOR_TEXT;
     }
 
     private void setSquareMap(Canvas canvas) {
@@ -275,6 +279,8 @@ class DrawThread extends Thread {
     }
 
     private void suggestMove(Canvas canvas) {
+     /*   Log.i("dan","paintingSuggestingMove "+paintingSuggestingMoveSquareX +" "+paintingSuggestingMoveSquareY+" paintSuggestingMoveSquare " +
+                paintSuggestingMoveSquare);*/
         if (paintSuggestingMoveSquare && neighboringTiles(paintingSuggestingMoveSquareX, paintingSuggestingMoveSquareY)) {
             if (paintingSuggestingMoveSquareX != -1 && paintingSuggestingMoveSquareY != -1) {
                 Bitmap current;

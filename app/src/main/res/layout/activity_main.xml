@@ -24,7 +24,8 @@
         android:textAllCaps="true"
         android:typeface="serif"
         android:textSize="24sp"
-        android:textColor="@android:color/holo_orange_light" />
+        android:textColor="@android:color/holo_orange_light"
+        android:layout_alignParentRight="true" />
 
     <Button
         android:id="@+id/about"
@@ -37,7 +38,9 @@
         android:textAllCaps="false"
         android:layout_below="@+id/continue_game"
         android:layout_alignEnd="@+id/continue_game"
-        android:layout_alignStart="@+id/continue_game" />
+        android:layout_alignStart="@+id/continue_game"
+        android:layout_alignLeft="@+id/continue_game"
+        android:layout_alignRight="@+id/continue_game" />
 
     <Button
         android:id="@+id/continue_game"
@@ -61,5 +64,6 @@
         android:textAlignment="center"
         android:textAllCaps="false"
         android:layout_below="@+id/textView"
-        android:layout_alignStart="@+id/continue_game" />
+        android:layout_alignStart="@+id/continue_game"
+        android:layout_alignLeft="@+id/continue_game" />
 </RelativeLayout>
