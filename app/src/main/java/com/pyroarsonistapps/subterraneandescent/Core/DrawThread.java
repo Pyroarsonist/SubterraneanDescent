@@ -19,6 +19,8 @@ import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.util.ArrayList;
 
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.*;
+
 
 class DrawThread extends Thread {
 
@@ -54,9 +56,9 @@ class DrawThread extends Thread {
 
     private int canvasW;
     private int canvasH;
-    private  int HPsizeText;
-    private  int LEVELsizeText ;
-    private final int SCALE_FOR_TEXT=20;
+    private int HPsizeText;
+    private int LEVELsizeText;
+    private final int SCALE_FOR_TEXT = 20;
 
     boolean needGenerate = true;
 
@@ -93,6 +95,7 @@ class DrawThread extends Thread {
 
     public void saveGame(Context context, int level, int turn, ArrayList<Creature> creatures) {
         Save.createSave(context, level, turn, creatures);
+        creaturesOpen.createSave(creatures, dbCreatures);
       /*  try {
             Log.i("dan", "DrawThread getSave: " + Save.getSave(context));
         } catch (IOException e) {
@@ -255,8 +258,8 @@ class DrawThread extends Thread {
     private void setCanvasProps(Canvas canvas) {
         canvasW = canvas.getWidth();
         canvasH = canvas.getHeight();
-        HPsizeText= canvasH/SCALE_FOR_TEXT;
-        LEVELsizeText= canvasH/SCALE_FOR_TEXT;
+        HPsizeText = canvasH / SCALE_FOR_TEXT;
+        LEVELsizeText = canvasH / SCALE_FOR_TEXT;
     }
 
     private void setSquareMap(Canvas canvas) {

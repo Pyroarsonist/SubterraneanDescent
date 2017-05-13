@@ -5,10 +5,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.pyroarsonistapps.subterraneandescent.Database.*;
 import com.pyroarsonistapps.subterraneandescent.R;
 
 import java.io.File;
@@ -17,12 +20,33 @@ import static com.pyroarsonistapps.subterraneandescent.Save.LEVELSAVEFILE;
 
 public class MainActivity extends Activity {
     AlertDialog.Builder continueGameOrNot;
+    protected  static DatabaseCreatures creaturesOpen;
+    protected static DatabaseSave saveOpen;
+    protected static DatabaseStatistics statisticsOpen;
+    protected static SQLiteDatabase dbCreatures, dbSave, dbStatistics;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initDB();
+    }
+
+    private void initDB() {
+        creaturesOpen = new DatabaseCreatures(getApplicationContext(), DatabaseCreatures.getTableNameCreatures(), null, DatabaseCreatures.getDatabaseVersion());
+        saveOpen = new DatabaseSave(getApplicationContext(), DatabaseSave.getTableNameSave(), null, DatabaseSave.getDatabaseVersion());
+        statisticsOpen = new DatabaseStatistics(getApplicationContext(), DatabaseStatistics.getTableNameStat(), null, DatabaseStatistics.getDatabaseVersion());
+
+        try {
+            dbCreatures = creaturesOpen.getWritableDatabase();
+            dbSave = saveOpen.getWritableDatabase();
+            dbStatistics = statisticsOpen.getWritableDatabase();
+        } catch (SQLiteException ex) {
+            dbCreatures = creaturesOpen.getReadableDatabase();
+            dbSave = saveOpen.getReadableDatabase();
+            dbStatistics = statisticsOpen.getReadableDatabase();
+        }
     }
 
     private void init() {
@@ -54,7 +78,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-         init();
+        init();
     }
 
     private void startLevelActivity(boolean startNewGame) {

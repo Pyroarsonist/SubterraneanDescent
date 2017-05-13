@@ -9,25 +9,23 @@ public class Creature {
     protected int y;
 
     protected int vector = 4;
-    protected int[] lastX = new int[9];
+    protected int[] lastX = new int[9]; // 0123456789 (real values) and - for null value
     protected int[] lastY = new int[9];
 
     protected boolean isAlive = true;
 
-    public Creature(int x, int y,int currentHP, int maxHP,int identity) {
+    public Creature(int x, int y, int currentHP, int maxHP, int identity) {
         this.x = x;
         this.y = y;
-        this.currentHP=currentHP;
-        this.maxHP=maxHP;
-        this.identity=identity;
+        this.currentHP = currentHP;
+        this.maxHP = maxHP;
+        this.identity = identity;
     }
 
 
     public Creature() {
 
     }
-
-
 
 
     public int getCurrentHP() {
