@@ -15,6 +15,9 @@ import com.pyroarsonistapps.subterraneandescent.Save;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.creaturesOpen;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
+
 
 public class LevelActivity extends Activity {
     private int level;
@@ -107,7 +110,8 @@ public class LevelActivity extends Activity {
                     Object[] getLevelAndTurnAndCreatures = Save.parseFromSaveFile(getApplicationContext(), creatures);
                     level = (int) getLevelAndTurnAndCreatures[0];
                     turn = (int) getLevelAndTurnAndCreatures[1];
-                    creatures = (ArrayList<Creature>) getLevelAndTurnAndCreatures[2];
+                   // creatures = (ArrayList<Creature>) getLevelAndTurnAndCreatures[2];
+                    creatures= creaturesOpen.getSave(dbCreatures);
 
                 } catch (IOException e) {
                     e.printStackTrace();

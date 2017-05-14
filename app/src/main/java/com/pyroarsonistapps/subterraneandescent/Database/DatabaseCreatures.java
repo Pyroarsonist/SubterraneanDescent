@@ -2,6 +2,7 @@ package com.pyroarsonistapps.subterraneandescent.Database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -30,27 +31,39 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
-        String command_creatures = "CREATE TABLE TABLE_NAME_CREATURES (_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "IDENTITY INTEGER, CURRENT_HP INTEGER,MAX_HP INTEGER, X INTEGER," +
-                "Y INTEGER,VECTOR INTEGER,LAST_X TEXT," +
-                "LAST_Y TEXT,IS_ALIVE INTEGER);";
-        db.execSQL(command_creatures);
+        createTable(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        deleteTable(db);
+        onCreate(db);
+    }
+
+    @Override
+    public void onDowngrade
+            (SQLiteDatabase db, int oldVersion, int newVersion) {
+        deleteTable(db);
+        onCreate(db);
     }
 
     public void createSave(ArrayList<Creature> creatures, SQLiteDatabase dbCreatures) {
+        deleteTable(dbCreatures);
+        createTable(dbCreatures);
         if (creatures != null) {
             for (int i = 0; i < creatures.size(); i++) {
                 Creature c = creatures.get(i);
                 String lastX = "";
                 String lastY = "";
                 for (int j = 0; j < c.getLastX().length; j++) {
-                    lastX += c.getLastX()[j];
-                    lastY += c.getLastY()[j];
+                    if (c.getLastX()[j] == -1)
+                        lastX += "-";
+                    else
+                        lastX += c.getLastX()[j];
+                    if (c.getLastY()[j] == -1)
+                        lastY += "-";
+                    else
+                        lastY += c.getLastY()[j];
                 }
                 int alive = c.getAlive() ? 1 : 0;
                 ContentValues newValues = new ContentValues();
@@ -63,15 +76,50 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
                 newValues.put(LAST_X, lastX);
                 newValues.put(LAST_Y, lastY);
                 newValues.put(IS_ALIVE, alive);
-
-               /* dbCreatures.update(TABLE_NAME_CREATURES,
-                        newValues,
-                        null,
-                        null);*/
                 dbCreatures.insert(TABLE_NAME_CREATURES, null, newValues);
-                Log.i("dan", "done db");
+                /*String q="INSERT INTO TABLE_NAME_CREATURES(IDENTITY,CURRENT_HP,MAX_HP,X,Y,VECTOR,LAST_X,LAST_Y,IS_ALIVE) VALUES ("+
+                        c.getIdentity()+","+c.getCurrentHP()+","+c.getMaxHP()+","+c.getX()+","+c.getY()+","+c.getVector()+","+lastX+","+lastY+","+alive+")";
+                dbCreatures.execSQL(q);*/
             }
         }
+        getSave(dbCreatures);
+    }
+
+    public ArrayList<Creature> getSave(SQLiteDatabase dbCreatures) {
+        ArrayList<Creature> creatures = new ArrayList<>();
+        Cursor cursor = dbCreatures.query(TABLE_NAME_CREATURES,
+                new String[]{IDENTITY, CURRENT_HP, MAX_HP, X, Y, VECTOR, LAST_X, LAST_Y, IS_ALIVE},
+                null, null, null, null, null);
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            int identity = cursor.getInt(cursor.getColumnIndex(IDENTITY));
+            int currentHP = cursor.getInt(cursor.getColumnIndex(CURRENT_HP));
+            int maxHP = cursor.getInt(cursor.getColumnIndex(MAX_HP));
+            int x = cursor.getInt(cursor.getColumnIndex(X));
+            int y = cursor.getInt(cursor.getColumnIndex(Y));
+            int vector = cursor.getInt(cursor.getColumnIndex(VECTOR));
+            String lastX = cursor.getString(cursor.getColumnIndex(LAST_X));
+            String lastY = cursor.getString(cursor.getColumnIndex(LAST_Y));
+            int isAlive = cursor.getInt(cursor.getColumnIndex(IS_ALIVE));
+            //Log.i("dan", "iteration check " + identity + " " + currentHP + " " + maxHP + " " + x + " " + y + " " + vector + " " + lastX + " " + lastY + " " + isAlive + " ");
+            Creature c = new Creature(identity, currentHP, maxHP, x, y, vector, lastX, lastY, isAlive);
+            creatures.add(c);
+            cursor.moveToNext();
+        }
+
+        return creatures;
+    }
+
+    private void deleteTable(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CREATURES);
+    }
+
+    private void createTable(SQLiteDatabase db) {
+        String command_creatures = "CREATE TABLE TABLE_NAME_CREATURES (_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "IDENTITY INTEGER, CURRENT_HP INTEGER,MAX_HP INTEGER, X INTEGER," +
+                "Y INTEGER,VECTOR INTEGER,LAST_X TEXT," +
+                "LAST_Y TEXT,IS_ALIVE INTEGER);";
+        db.execSQL(command_creatures);
     }
 
 
