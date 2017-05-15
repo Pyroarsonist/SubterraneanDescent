@@ -3,7 +3,6 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -12,14 +11,18 @@ import android.graphics.Paint;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 import com.pyroarsonistapps.subterraneandescent.Logic.Square;
 import com.pyroarsonistapps.subterraneandescent.R;
-import com.pyroarsonistapps.subterraneandescent.Save;
 
 import java.util.ArrayList;
 
-import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.*;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbLevel;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbStatistics;
 
 
 class DrawThread extends Thread {
@@ -94,8 +97,7 @@ class DrawThread extends Thread {
     }
 
     public void saveGame(Context context, int level, int turn, ArrayList<Creature> creatures) {
-        Save.createSave(context, level, turn, creatures);
-        creaturesOpen.createSave(creatures, dbCreatures);
+        DatabaseCreatures.createSave(creatures, dbCreatures);
       /*  try {
             Log.i("dan", "DrawThread getSave: " + Save.getSave(context));
         } catch (IOException e) {
@@ -354,12 +356,8 @@ class DrawThread extends Thread {
     }
 
     private void addTurn() {
-        //  Log.i("dan","turn from : "+turn);
-        turn++;
-        LevelActivity myActivity = (LevelActivity) context;
-        SharedPreferences mSettings = myActivity.getSettings();
-        Save.saveTurn(mSettings);
-        //Log.i("dan","turn to : "+turn);
+        DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatTurn());
+        DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getTURN());
     }
 
     private void setLastXYArray(Creature c) {
@@ -423,9 +421,24 @@ class DrawThread extends Thread {
     }
 
     private void saveCounterOFEnemies(Creature enemy) {
-        LevelActivity myActivity = (LevelActivity) context;
-        SharedPreferences mSettings = myActivity.getSettings();
-        Save.saveCounterOfEnemies(mSettings, enemy.getIdentity());
+        switch (enemy.getIdentity()) {
+            case 1: {
+                DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatGoblins());
+                DatabaseLevel.incrementInfo(dbStatistics, DatabaseLevel.getGOBLINS());
+                break;
+            }
+            case 2: {
+                DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatArchers());
+                DatabaseLevel.incrementInfo(dbStatistics, DatabaseLevel.getARCHERS());
+                break;
+            }
+            case 3: {
+                DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatMages());
+                DatabaseLevel.incrementInfo(dbStatistics, DatabaseLevel.getMAGES());
+                break;
+            }
+        }
+
     }
 
     private void enemyTurn() {

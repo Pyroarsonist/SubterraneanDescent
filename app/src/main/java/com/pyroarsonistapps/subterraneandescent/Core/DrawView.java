@@ -2,22 +2,21 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
-import com.pyroarsonistapps.subterraneandescent.Save;
 
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static com.pyroarsonistapps.subterraneandescent.Save.LEVELSAVEFILE;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbStatistics;
 
 
 class DrawView extends SurfaceView implements SurfaceHolder.Callback {
@@ -237,10 +236,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             saveCounterOfWinnedLevels();
             if (level == MAXLEVEL) {
                 Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_SHORT).show();
-                String filename = LEVELSAVEFILE;
-                File file = new File(getContext().getFilesDir(), filename);
-                if (file.exists())
-                    file.delete();
+                DatabaseCreatures.deleteTable(dbCreatures); //TODO rework delete
             } else {
                 creatures = drawThread.getCreatures();
                 Creature hero = creatures.get(0);
@@ -261,9 +257,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void saveCounterOfWinnedLevels() {
-        LevelActivity myActivity = (LevelActivity) getContext();
-        SharedPreferences mSettings = myActivity.getSettings();
-        Save.saveCounterOfWinnedLevels(mSettings);
+        DatabaseStatistics.incrementInfo(dbStatistics,DatabaseStatistics.getStatWinnedLevels());
     }
 
     public boolean getWon() {

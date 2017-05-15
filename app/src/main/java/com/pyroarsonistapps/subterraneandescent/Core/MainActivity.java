@@ -11,19 +11,19 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.pyroarsonistapps.subterraneandescent.Database.*;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
 import com.pyroarsonistapps.subterraneandescent.R;
 
 import java.io.File;
 
-import static com.pyroarsonistapps.subterraneandescent.Save.LEVELSAVEFILE;
-
 public class MainActivity extends Activity {
     AlertDialog.Builder continueGameOrNot;
-    protected  static DatabaseCreatures creaturesOpen;
-    protected static DatabaseSave saveOpen;
+    protected static DatabaseCreatures creaturesOpen;
+    protected static DatabaseLevel saveLevel;
     protected static DatabaseStatistics statisticsOpen;
-    protected static SQLiteDatabase dbCreatures, dbSave, dbStatistics;
+    protected static SQLiteDatabase dbCreatures, dbLevel, dbStatistics;
 
 
     @Override
@@ -35,16 +35,16 @@ public class MainActivity extends Activity {
 
     private void initDB() {
         creaturesOpen = new DatabaseCreatures(getApplicationContext(), DatabaseCreatures.getTableNameCreatures(), null, DatabaseCreatures.getDatabaseVersion());
-        saveOpen = new DatabaseSave(getApplicationContext(), DatabaseSave.getTableNameSave(), null, DatabaseSave.getDatabaseVersion());
+        saveLevel = new DatabaseLevel(getApplicationContext(), DatabaseLevel.getTableNameSave(), null, DatabaseLevel.getDatabaseVersion());
         statisticsOpen = new DatabaseStatistics(getApplicationContext(), DatabaseStatistics.getTableNameStat(), null, DatabaseStatistics.getDatabaseVersion());
 
         try {
             dbCreatures = creaturesOpen.getWritableDatabase();
-            dbSave = saveOpen.getWritableDatabase();
+            dbLevel = saveLevel.getWritableDatabase();
             dbStatistics = statisticsOpen.getWritableDatabase();
         } catch (SQLiteException ex) {
             dbCreatures = creaturesOpen.getReadableDatabase();
-            dbSave = saveOpen.getReadableDatabase();
+            dbLevel = saveLevel.getReadableDatabase();
             dbStatistics = statisticsOpen.getReadableDatabase();
         }
     }
@@ -112,7 +112,9 @@ public class MainActivity extends Activity {
     }
 
     private boolean checkExistingOfSaveFile() {
-        File f = new File(getApplicationContext().getFilesDir(), LEVELSAVEFILE);
+        /*Environment.getDataDirectory().getAbsolutePath()+"data/"+getApplicationContext().getPackageName()+"/databases/"+*/
+        String path = dbCreatures.getPath();
+        File f = new File(android.os.Environment.getDataDirectory().getAbsolutePath() + "data/" + getApplicationContext().getPackageName() + "/databases/", path);
         // Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
         return f.exists();
     }

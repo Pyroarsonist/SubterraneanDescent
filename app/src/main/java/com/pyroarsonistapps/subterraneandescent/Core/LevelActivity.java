@@ -2,21 +2,21 @@ package com.pyroarsonistapps.subterraneandescent.Core;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 import com.pyroarsonistapps.subterraneandescent.R;
-import com.pyroarsonistapps.subterraneandescent.Save;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.creaturesOpen;
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbLevel;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbStatistics;
 
 
 public class LevelActivity extends Activity {
@@ -28,15 +28,12 @@ public class LevelActivity extends Activity {
     private ArrayList<Creature> creatures = null;
     private DrawView dv;
 
-    private SharedPreferences mSettings;
-
     private AlertDialog.Builder gifts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         needToGetSave = getIntent().getBooleanExtra("needToGetSave", false);
-        mSettings = getSharedPreferences(Save.APP_PREFERENCES, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -94,28 +91,21 @@ public class LevelActivity extends Activity {
 
     private void restoreHP() {
         heroHP = initMaxHeroHP;
-        Save.saveRestored(mSettings);
+        DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatRestoredAbilityTaken());
     }
 
     private void incrementHP() {
         initMaxHeroHP++;
-        Save.saveObtain(mSettings);
+        DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatObtainAbilityTaken());
     }
 
 
     private void initFromIntent() {
         if (level == -1 || level == 1) {
-            if (needToGetSave) {
-                try { //from save
-                    Object[] getLevelAndTurnAndCreatures = Save.parseFromSaveFile(getApplicationContext(), creatures);
-                    level = (int) getLevelAndTurnAndCreatures[0];
-                    turn = (int) getLevelAndTurnAndCreatures[1];
-                   // creatures = (ArrayList<Creature>) getLevelAndTurnAndCreatures[2];
-                    creatures= creaturesOpen.getSave(dbCreatures);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            if (needToGetSave) {//from save
+                    level = DatabaseLevel.getInfo(dbLevel,false,DatabaseLevel.getLEVEL());
+                    turn = DatabaseLevel.getInfo(dbLevel,false,DatabaseLevel.getTURN());
+                    creatures = creaturesOpen.getSave(dbCreatures);
             } else {
                 level = 1; //new game
                 turn = 1;
@@ -134,7 +124,7 @@ public class LevelActivity extends Activity {
         level = getIntent().getIntExtra("onNextLevel", -1);
         initFromIntent();
         if (!needToGetSave) {
-            Save.saveCounterOfLevels(mSettings);
+            DatabaseStatistics.incrementInfo(dbStatistics,DatabaseStatistics.getStatLevels());
             dv = new DrawView(this, level, turn, heroHP, initMaxHeroHP);
         } else
             dv = new DrawView(this, level, turn, creatures);
@@ -156,10 +146,6 @@ public class LevelActivity extends Activity {
 
     private void createPause() {
         dv.drawThread.createPauseDialog();
-    }
-
-    public SharedPreferences getSettings() {
-        return mSettings;
     }
 
 

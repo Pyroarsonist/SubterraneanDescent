@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 
@@ -47,7 +46,7 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void createSave(ArrayList<Creature> creatures, SQLiteDatabase dbCreatures) {
+    public void createSave(ArrayList<Creature> creatures, SQLiteDatabase dbCreatures) { //TODO now just creates always new
         deleteTable(dbCreatures);
         createTable(dbCreatures);
         if (creatures != null) {
@@ -106,11 +105,21 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
             creatures.add(c);
             cursor.moveToNext();
         }
-
+            cursor.close();
         return creatures;
     }
 
-    private void deleteTable(SQLiteDatabase db) {
+    /*public static void (SQLiteDatabase db) {
+        Cursor cursor = db.query(TABLE_NAME_CREATURES, new String[]{CURRENT_HP}, null, null, null, null, null);
+        cursor.moveToFirst();
+        int hp=cursor.getInt(cursor.getColumnIndex(CURRENT_HP));
+        int counter = mSettings.getInt(APP_PREFERENCES_RESTORED_ABILITY_TAKEN, 0) + 1;
+        SharedPreferences.Editor editor = mSettings.edit();
+        editor.putInt(APP_PREFERENCES_RESTORED_ABILITY_TAKEN, counter);
+        editor.apply();
+    }*/
+
+    public static void deleteTable(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CREATURES);
     }
 
