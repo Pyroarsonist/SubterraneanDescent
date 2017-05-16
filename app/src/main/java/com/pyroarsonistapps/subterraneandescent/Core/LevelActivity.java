@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
 import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
 import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
@@ -13,7 +14,6 @@ import com.pyroarsonistapps.subterraneandescent.R;
 
 import java.util.ArrayList;
 
-import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.creaturesOpen;
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbLevel;
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbStatistics;
@@ -46,6 +46,7 @@ public class LevelActivity extends Activity {
     protected void onPause() {
         super.onPause();
         needToGetSave = true;
+        dv.drawThread.saveGame(getApplicationContext(),dv.drawThread.getLevel(),dv.drawThread.getTurn(),dv.drawThread.getCreatures());
     }
 
     public void end() {
@@ -105,17 +106,17 @@ public class LevelActivity extends Activity {
             if (needToGetSave) {//from save
                     level = DatabaseLevel.getInfo(dbLevel,false,DatabaseLevel.getLEVEL());
                     turn = DatabaseLevel.getInfo(dbLevel,false,DatabaseLevel.getTURN());
-                    creatures = creaturesOpen.getSave(dbCreatures);
+                    creatures = DatabaseCreatures.getSave(dbCreatures);
             } else {
                 level = 1; //new game
-                turn = 1;
+                turn = 0;
                 heroHP = 3;
                 initMaxHeroHP = 3;
             }
         } else {
             needToGetSave = false; //new level
             heroHP = getIntent().getIntExtra("heroHP", -1);
-            turn = 1;
+            turn = 0;
             initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", -1);
         }
     }

@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
 
     private void initDB() {
         creaturesOpen = new DatabaseCreatures(getApplicationContext(), DatabaseCreatures.getTableNameCreatures(), null, DatabaseCreatures.getDatabaseVersion());
-        saveLevel = new DatabaseLevel(getApplicationContext(), DatabaseLevel.getTableNameSave(), null, DatabaseLevel.getDatabaseVersion());
+        saveLevel = new DatabaseLevel(getApplicationContext(), DatabaseLevel.getTableNameLevel(), null, DatabaseLevel.getDatabaseVersion());
         statisticsOpen = new DatabaseStatistics(getApplicationContext(), DatabaseStatistics.getTableNameStat(), null, DatabaseStatistics.getDatabaseVersion());
 
         try {

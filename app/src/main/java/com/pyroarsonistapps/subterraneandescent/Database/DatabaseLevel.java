@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseLevel extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     // current level
-    private static final String TABLE_NAME_SAVE = "TABLE_NAME_SAVE";
+    private static final String TABLE_NAME_LEVEL = "TABLE_NAME_LEVEL";
     private static final String LEVEL = "LEVEL";
     private static final String TURN = "TURN";
     private static final String GOBLINS = "GOBLINS";
@@ -30,7 +30,7 @@ public class DatabaseLevel extends SQLiteOpenHelper {
         newValues.put(GOBLINS, 0);
         newValues.put(ARCHERS, 0);
         newValues.put(MAGES, 0);
-        db.insert(TABLE_NAME_SAVE, null, newValues);
+        db.insert(TABLE_NAME_LEVEL, null, newValues);
     }
 
     @Override
@@ -47,12 +47,19 @@ public class DatabaseLevel extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public static void createSave(int level, int turn, SQLiteDatabase dbLevel) {
+        //Log.i("dan",level+" "+turn);
+        setInfo(dbLevel, LEVEL, level);
+        setInfo(dbLevel, TURN, turn);
+    }
+
+
     public static int getInfo(SQLiteDatabase db, boolean newValue, String info) {
         int infoValue;
         if (newValue) {
             infoValue = 0;
         } else {
-            Cursor cursor = db.query(TABLE_NAME_SAVE,
+            Cursor cursor = db.query(TABLE_NAME_LEVEL,
                     new String[]{info},
                     null, null, null, null, null);
             cursor.moveToFirst();
@@ -65,26 +72,27 @@ public class DatabaseLevel extends SQLiteOpenHelper {
     public static void setInfo(SQLiteDatabase db, String info, int infoValue) {
         ContentValues updatedValues = new ContentValues();
         updatedValues.put(info, infoValue);
-        db.update(TABLE_NAME_SAVE, updatedValues, null, null);
+        db.update(TABLE_NAME_LEVEL, updatedValues, null, null);
     }
 
     public static void incrementInfo(SQLiteDatabase db, String info) {
         int infoValue = getInfo(db, false, info) + 1;
+        //Log.i("dan",info + " "+infoValue);
         setInfo(db, info, infoValue);
     }
 
     private void deleteTable(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_SAVE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_LEVEL);
     }
 
     private void createTable(SQLiteDatabase db) {
-        String command_save = "CREATE TABLE TABLE_NAME_SAVE (_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "LEVEL INTEGER,TURN INTEGER);";
+        String command_save = "CREATE TABLE TABLE_NAME_LEVEL (_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "LEVEL INTEGER,TURN INTEGER,GOBLINS INTEGER,ARCHERS INTEGER,MAGES INTEGER);";
         db.execSQL(command_save);
     }
 
-    public static String getTableNameSave() {
-        return TABLE_NAME_SAVE;
+    public static String getTableNameLevel() {
+        return TABLE_NAME_LEVEL;
     }
 
     public static int getDatabaseVersion() {
@@ -110,5 +118,6 @@ public class DatabaseLevel extends SQLiteOpenHelper {
     public static String getTURN() {
         return TURN;
     }
+
 
 }

@@ -46,7 +46,7 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void createSave(ArrayList<Creature> creatures, SQLiteDatabase dbCreatures) { //TODO now just creates always new
+    public static void createSave(ArrayList<Creature> creatures, SQLiteDatabase dbCreatures) { //TODO now just creates always new
         deleteTable(dbCreatures);
         createTable(dbCreatures);
         if (creatures != null) {
@@ -84,7 +84,7 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
         getSave(dbCreatures);
     }
 
-    public ArrayList<Creature> getSave(SQLiteDatabase dbCreatures) {
+    public static ArrayList<Creature> getSave(SQLiteDatabase dbCreatures) {
         ArrayList<Creature> creatures = new ArrayList<>();
         Cursor cursor = dbCreatures.query(TABLE_NAME_CREATURES,
                 new String[]{IDENTITY, CURRENT_HP, MAX_HP, X, Y, VECTOR, LAST_X, LAST_Y, IS_ALIVE},
@@ -123,7 +123,7 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CREATURES);
     }
 
-    private void createTable(SQLiteDatabase db) {
+    private static void createTable(SQLiteDatabase db) {
         String command_creatures = "CREATE TABLE TABLE_NAME_CREATURES (_id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "IDENTITY INTEGER, CURRENT_HP INTEGER,MAX_HP INTEGER, X INTEGER," +
                 "Y INTEGER,VECTOR INTEGER,LAST_X TEXT," +

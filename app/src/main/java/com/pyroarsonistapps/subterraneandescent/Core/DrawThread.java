@@ -98,11 +98,8 @@ class DrawThread extends Thread {
 
     public void saveGame(Context context, int level, int turn, ArrayList<Creature> creatures) {
         DatabaseCreatures.createSave(creatures, dbCreatures);
-      /*  try {
-            Log.i("dan", "DrawThread getSave: " + Save.getSave(context));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        // Log.i("dan", "turn: " + turn);
+        DatabaseLevel.createSave(level, turn, dbLevel);
     }
 
 
@@ -356,6 +353,7 @@ class DrawThread extends Thread {
     }
 
     private void addTurn() {
+        turn++;
         DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatTurn());
         DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getTURN());
     }
@@ -424,7 +422,7 @@ class DrawThread extends Thread {
         switch (enemy.getIdentity()) {
             case 1: {
                 DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatGoblins());
-                DatabaseLevel.incrementInfo(dbStatistics, DatabaseLevel.getGOBLINS());
+                DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getGOBLINS());
                 break;
             }
             case 2: {
