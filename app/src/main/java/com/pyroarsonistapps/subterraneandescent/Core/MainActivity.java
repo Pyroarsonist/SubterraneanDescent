@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -29,8 +30,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         initDB();
+        setContentView(R.layout.activity_main);
     }
 
     private void initDB() {
@@ -61,7 +62,6 @@ public class MainActivity extends Activity {
                 if (canContinue)
                     continueGameOrNot.show();
                 else
-                    //createSave(MainActivity.this, 0, null);  //TODO use if else statement later to check if save exists
                     startLevelActivity(true);
             }
 
@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
 
     private void startLevelActivity(boolean startNewGame) {
         Intent myIntent = new Intent(MainActivity.this, LoadingScreen.class);
-        myIntent.putExtra("needToGetSave", !startNewGame);
+        myIntent.putExtra("isNewLevel", startNewGame);
         MainActivity.this.startActivity(myIntent);
     }
 
@@ -112,11 +112,8 @@ public class MainActivity extends Activity {
     }
 
     private boolean checkExistingOfSaveFile() {
-        /*Environment.getDataDirectory().getAbsolutePath()+"data/"+getApplicationContext().getPackageName()+"/databases/"+*/
-        String path = dbCreatures.getPath();
-        File f = new File(android.os.Environment.getDataDirectory().getAbsolutePath() + "data/" + getApplicationContext().getPackageName() + "/databases/", path);
-        // Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
-        return f.exists();
+        //Log.i("dan", "" + DatabaseCreatures.saveExists(dbCreatures));
+        return DatabaseCreatures.saveExists(dbCreatures);
     }
 
     @Override
@@ -124,4 +121,6 @@ public class MainActivity extends Activity {
         super.onDestroy();
         System.exit(0);
     }
+
+
 }

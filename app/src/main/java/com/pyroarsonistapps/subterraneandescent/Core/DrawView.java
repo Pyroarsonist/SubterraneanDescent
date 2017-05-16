@@ -9,6 +9,7 @@ import android.view.SurfaceView;
 import android.widget.Toast;
 
 import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
 import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
 import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbLevel;
 import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbStatistics;
 
 
@@ -188,10 +190,6 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        //checking end of the game
-
-        checkGameEnd();
-
         int action = event.getAction();
 
         if (action == MotionEvent.ACTION_DOWN) {
@@ -217,12 +215,14 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             drawThread.setPaintSuggestingMoveSquare(true);
             drawThread.setRepaint(true);
         }
+        //checking end of the game
+        checkGameEnd();
 
         return true;
     }
 
     private void checkGameEnd() {
-        if (!drawThread.isAlive() && continued)
+        if ((drawThread.getAllEnemiesDead() && drawThread.atStairs() && continued)||!drawThread.getCreatures().get(0).getAlive())
             end(drawThread.getAllEnemiesDead());
     }
 
@@ -236,7 +236,8 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             saveCounterOfWinnedLevels();
             if (level == MAXLEVEL) {
                 Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_SHORT).show();
-                DatabaseCreatures.deleteTable(dbCreatures); //TODO rework delete
+                DatabaseCreatures.deleteTable(dbCreatures);
+               // DatabaseLevel.deleteTable(dbLevel);
             } else {
                 creatures = drawThread.getCreatures();
                 Creature hero = creatures.get(0);
@@ -246,6 +247,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         } else {
             Log.i("dan", "LOST LEVEL");
             Toast.makeText(this.getContext(), "You lost...", Toast.LENGTH_SHORT).show();
+            DatabaseCreatures.deleteTable(dbCreatures);
         }
         try {
             drawThread.join();
@@ -257,7 +259,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private void saveCounterOfWinnedLevels() {
-        DatabaseStatistics.incrementInfo(dbStatistics,DatabaseStatistics.getStatWinnedLevels());
+        DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatWinnedLevels());
     }
 
     public boolean getWon() {

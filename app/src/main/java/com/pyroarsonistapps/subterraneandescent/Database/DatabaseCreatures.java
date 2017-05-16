@@ -75,13 +75,13 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
                 newValues.put(LAST_X, lastX);
                 newValues.put(LAST_Y, lastY);
                 newValues.put(IS_ALIVE, alive);
-                dbCreatures.insert(TABLE_NAME_CREATURES, null, newValues);
+                dbCreatures.insert(TABLE_NAME_CREATURES, null, newValues); //TODO dalvik lost here need async
                 /*String q="INSERT INTO TABLE_NAME_CREATURES(IDENTITY,CURRENT_HP,MAX_HP,X,Y,VECTOR,LAST_X,LAST_Y,IS_ALIVE) VALUES ("+
                         c.getIdentity()+","+c.getCurrentHP()+","+c.getMaxHP()+","+c.getX()+","+c.getY()+","+c.getVector()+","+lastX+","+lastY+","+alive+")";
                 dbCreatures.execSQL(q);*/
             }
         }
-        getSave(dbCreatures);
+        //getSave(dbCreatures);
     }
 
     public static ArrayList<Creature> getSave(SQLiteDatabase dbCreatures) {
@@ -105,19 +105,22 @@ public class DatabaseCreatures extends SQLiteOpenHelper {
             creatures.add(c);
             cursor.moveToNext();
         }
-            cursor.close();
+        cursor.close();
         return creatures;
     }
 
-    /*public static void (SQLiteDatabase db) {
-        Cursor cursor = db.query(TABLE_NAME_CREATURES, new String[]{CURRENT_HP}, null, null, null, null, null);
-        cursor.moveToFirst();
-        int hp=cursor.getInt(cursor.getColumnIndex(CURRENT_HP));
-        int counter = mSettings.getInt(APP_PREFERENCES_RESTORED_ABILITY_TAKEN, 0) + 1;
-        SharedPreferences.Editor editor = mSettings.edit();
-        editor.putInt(APP_PREFERENCES_RESTORED_ABILITY_TAKEN, counter);
-        editor.apply();
-    }*/
+    public static boolean saveExists(SQLiteDatabase db) {
+        try {
+            Cursor cursor = db.query(TABLE_NAME_CREATURES,
+                    new String[]{IDENTITY, CURRENT_HP, MAX_HP, X, Y, VECTOR, LAST_X, LAST_Y, IS_ALIVE},
+                    null, null, null, null, null);
+            cursor.moveToFirst();
+            cursor.getInt(cursor.getColumnIndex(IDENTITY));
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
 
     public static void deleteTable(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CREATURES);

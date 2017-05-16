@@ -14,7 +14,7 @@ public class LoadingScreen extends Activity {
     private int level;
     private int heroHP;
     private int initMaxHeroHP;
-    private boolean needToGetSave;
+    private boolean isNewLevel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,16 +34,16 @@ public class LoadingScreen extends Activity {
     }
 
     private void init() {
-        needToGetSave = getIntent().getBooleanExtra("needToGetSave", false);
-        heroHP = getIntent().getIntExtra("heroHP", -1);
-        initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", -1);
-        level = getIntent().getIntExtra("onNextLevel", -1);
+        isNewLevel = getIntent().getBooleanExtra("isNewLevel", true);
+        heroHP = getIntent().getIntExtra("heroHP", 3);
+        initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", 3);
+        level = getIntent().getIntExtra("onNextLevel", 1);
     }
 
 
     private void startApp() {
         Intent myIntent = new Intent(LoadingScreen.this, LevelActivity.class);
-        myIntent.putExtra("needToGetSave", needToGetSave);
+        myIntent.putExtra("isNewLevel", isNewLevel);
         myIntent.putExtra("onNextLevel", level);
         myIntent.putExtra("heroHP", heroHP);
         myIntent.putExtra("initMaxHeroHP", initMaxHeroHP);

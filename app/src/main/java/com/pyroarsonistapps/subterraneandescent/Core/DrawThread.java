@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -48,6 +49,8 @@ class DrawThread extends Thread {
     // hero's x and y == squares x and y
     public static int initHeroX = (numSqW - 1) / 2;
     public static int initHeroY = numSqH - 1;
+    public static int stairsX = (numSqW - 1) / 2;
+    public static int stairsY = 1;
 
     private int paintingSuggestingMoveSquareX = initHeroX;
     private int paintingSuggestingMoveSquareY = initHeroY;
@@ -93,12 +96,10 @@ class DrawThread extends Thread {
         banned_square = BitmapFactory.decodeResource(context.getResources(), R.drawable.banned_square);
         archer = BitmapFactory.decodeResource(context.getResources(), R.drawable.archer);
         mage = BitmapFactory.decodeResource(context.getResources(), R.drawable.mage);
-        saveGame(context, level, turn, creatures);
     }
 
     public void saveGame(Context context, int level, int turn, ArrayList<Creature> creatures) {
         DatabaseCreatures.createSave(creatures, dbCreatures);
-        // Log.i("dan", "turn: " + turn);
         DatabaseLevel.createSave(level, turn, dbLevel);
     }
 
@@ -193,20 +194,17 @@ class DrawThread extends Thread {
     private void stairsPainting(Canvas canvas) {
         checkIfAllAreDead();
         if (allEnemiesDead) {
-            int stairsX = (numSqW - 1) / 2;
-            int stairsY = 1;
             float currX = squares[stairsY][stairsX].getX();
             float currY = squares[stairsY][stairsX].getY();
             canvas.drawBitmap(stairs, currX, currY, null);
-            if (heroC.getX() == stairsX && heroC.getY() == stairsY) {
-                wonGame();
+            if (atStairs()) {
+                endGame(true);
             }
         }
     }
 
-    private void wonGame() {
-        //TODO need smth here
-        setRunning(false);
+    public boolean atStairs() {
+        return (heroC.getX() == stairsX && heroC.getY() == stairsY);
     }
 
     private void HPPainting(Canvas canvas) {
@@ -427,12 +425,12 @@ class DrawThread extends Thread {
             }
             case 2: {
                 DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatArchers());
-                DatabaseLevel.incrementInfo(dbStatistics, DatabaseLevel.getARCHERS());
+                DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getARCHERS());
                 break;
             }
             case 3: {
                 DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatMages());
-                DatabaseLevel.incrementInfo(dbStatistics, DatabaseLevel.getMAGES());
+                DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getMAGES());
                 break;
             }
         }
@@ -712,12 +710,12 @@ class DrawThread extends Thread {
     private void checkHerosDeath() {
         if (heroC.getCurrentHP() <= 0) {
             heroC.setAlive(false);
-            endGame();
+            endGame(false);
         }
 
     }
 
-    private void endGame() {
+    private void endGame(boolean won) {
         setRunning(false);
     }
 

@@ -81,7 +81,7 @@ public class DatabaseLevel extends SQLiteOpenHelper {
         setInfo(db, info, infoValue);
     }
 
-    private void deleteTable(SQLiteDatabase db) {
+    public static void deleteTable(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_LEVEL);
     }
 
