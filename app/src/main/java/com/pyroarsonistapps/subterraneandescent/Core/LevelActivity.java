@@ -1,31 +1,41 @@
 package com.pyroarsonistapps.subterraneandescent.Core;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ProgressBar;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 import com.pyroarsonistapps.subterraneandescent.R;
-import com.pyroarsonistapps.subterraneandescent.Save;
 
-import java.io.IOException;
 import java.util.ArrayList;
+
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbLevel;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbStatistics;
 
 
 public class LevelActivity extends Activity {
     private int level;
+    private int turn;
     private int heroHP;
     private int initMaxHeroHP;
-    private boolean needToGetSave;
+    private boolean isNewLevel;
+    private boolean going=true;
     private ArrayList<Creature> creatures = null;
     private DrawView dv;
+
+    private AlertDialog.Builder gifts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        needToGetSave = getIntent().getBooleanExtra("needToGetSave", false);
+        isNewLevel = getIntent().getBooleanExtra("isNewLevel", false);
     }
 
     @Override
@@ -35,57 +45,89 @@ public class LevelActivity extends Activity {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        needToGetSave = true;
+    protected void onStop() {
+        super.onStop();
+        isNewLevel = false;
+        if(going)
+        dv.drawThread.saveGame(getApplicationContext(), dv.drawThread.getLevel(), dv.drawThread.getTurn(), dv.drawThread.getCreatures());
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void end() {
         boolean won = dv.getWon();
-        level = dv.getLevel();
-        if (level == dv.getMAXLEVEL()) { //TODO call results
-            return;
-        }
-        if (won) { //TODO need loading screen
+        if (won) {
+            level = dv.getLevel();
+            if (level == dv.getMAXLEVEL()) { //TODO call results
+                going=false;
+                this.finish();
+                return;
+            }
             level++;
             heroHP = dv.getHeroHP();
             initMaxHeroHP = dv.getInitMaxHeroHP();
-            createSplashActivity();
+            setGiftDialog();
+        } else {
+            this.finish();
         }
     }
 
-    private void initFromIntent() {
-        if (level == -1 | level == 1) {
-            if (needToGetSave) {
-                try {
-                    Object[] getLevelAndCreatures = Save.parseFromSaveFile(getApplicationContext(), creatures);
-                    level = (int) getLevelAndCreatures[0];
-                    creatures = (ArrayList<Creature>) getLevelAndCreatures[1];
+    private void setGiftDialog() {
+        final String message = getResources().getString(R.string.gifts_alert);
+        final String restore = getResources().getString(R.string.gifts_restore);
+        final String increment_hp = getResources().getString(R.string.gifts_increment_hp);
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                level = 1;
-                heroHP = 3;
-                initMaxHeroHP = 3;
+        gifts = new AlertDialog.Builder(this);
+        gifts.setMessage(message);
+        gifts.setPositiveButton(restore, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                restoreHP(); //TODO check for levels
+                createSplashActivity();
+                finish();
             }
+        });
+        gifts.setNegativeButton(increment_hp, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int arg1) {
+                incrementHP();
+                createSplashActivity();
+                finish();
+            }
+        });
+        gifts.setCancelable(false);
+        gifts.show();
+    }
+
+    private void restoreHP() {
+        heroHP = initMaxHeroHP;
+        DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatRestoredAbilityTaken());
+    }
+
+    private void incrementHP() {
+        initMaxHeroHP++;
+        DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatObtainAbilityTaken());
+    }
+
+
+    private void initFromIntent() {
+        if (!isNewLevel) {//from save
+            level = DatabaseLevel.getInfo(dbLevel, false, DatabaseLevel.getLEVEL());
+            turn = DatabaseLevel.getInfo(dbLevel, false, DatabaseLevel.getTURN());
+            creatures = DatabaseCreatures.getSave(dbCreatures);
         } else {
-            needToGetSave = false;
-            heroHP = getIntent().getIntExtra("heroHP", -1);
-            initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", -1);
+            level = getIntent().getIntExtra("onNextLevel", 1);//new level
+            turn = 0;
+            heroHP = getIntent().getIntExtra("heroHP", 3);
+            initMaxHeroHP = getIntent().getIntExtra("initMaxHeroHP", 3);
         }
+
     }
 
     private void init() {
-        level = getIntent().getIntExtra("onNextLevel", -1);
+       // Log.i("dan", level + " init " + isNewLevel);
         initFromIntent();
-        if (!needToGetSave)
-            dv = new DrawView(this, level, heroHP, initMaxHeroHP);
-        else
-            dv = new DrawView(this, level, creatures);
+        if (isNewLevel) {
+            DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatLevels());
+            dv = new DrawView(this, level, turn, heroHP, initMaxHeroHP);
+        } else
+            dv = new DrawView(this, level, turn, creatures);
         setContentView(dv);
     }
 

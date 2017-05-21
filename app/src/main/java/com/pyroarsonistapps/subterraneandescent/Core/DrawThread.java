@@ -12,29 +12,31 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Archer;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Goblin;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Hero;
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Mage;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 import com.pyroarsonistapps.subterraneandescent.Logic.Square;
 import com.pyroarsonistapps.subterraneandescent.R;
-import com.pyroarsonistapps.subterraneandescent.Save;
 
-import java.io.IOException;
 import java.util.ArrayList;
+
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbLevel;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbStatistics;
 
 
 class DrawThread extends Thread {
 
     private Bitmap square, suggestingSquare, hero, goblin, stairs, banned_square, mage, archer;
     private Context context;
-    private int numSqH = 9;
-    private int numSqW = 7;
+    public static int numSqH = 9;
+    public static int numSqW = 7;
     private Square[][] squares = new Square[numSqH][numSqW]; // [0][0],[0][1]...
     private boolean[][] onTile = new boolean[numSqH][numSqW];
     private boolean allEnemiesDead = false;
     private int level;
+    private int turn;
 
     private boolean running = false;
 
@@ -45,10 +47,10 @@ class DrawThread extends Thread {
     private AlertDialog.Builder pauseDialog;
 
     // hero's x and y == squares x and y
-    private int initHeroX = (numSqW - 1) / 2;
-    private int initHeroY = numSqH - 1;
-    private int initHeroHP;
-    private int initMaxHeroHP;
+    public static int initHeroX = (numSqW - 1) / 2;
+    public static int initHeroY = numSqH - 1;
+    public static int stairsX = (numSqW - 1) / 2;
+    public static int stairsY = 1;
 
     private int paintingSuggestingMoveSquareX = initHeroX;
     private int paintingSuggestingMoveSquareY = initHeroY;
@@ -60,51 +62,30 @@ class DrawThread extends Thread {
 
     private int canvasW;
     private int canvasH;
-    private final int HPsizeText = 110;
-    private final int LEVELsizeText = 120;
+    private int HPsizeText;
+    private int LEVELsizeText;
+    private final int SCALE_FOR_TEXT = 20;
 
     boolean needGenerate = true;
 
 
     private Creature heroC;
 
-    public DrawThread(SurfaceHolder holder, Context context, int level, ArrayList<Creature> creatures, boolean needGenerate) {
+    public DrawThread(SurfaceHolder holder, Context context, int level, int turn, ArrayList<Creature> creatures, boolean needGenerate) {
         this.surfaceHolder = holder;
         this.needGenerate = needGenerate;
         this.context = context;
         this.level = level;
+        this.turn = turn;
         this.creatures = creatures;
-        init(null, null, null);
+        init();
     }
 
 
-    private void init(ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY) {
-        if (needGenerate) {
-            if (initHeroHP == 0 & initMaxHeroHP == 0)
-                creatures.add(new Hero(initHeroX, initHeroY));
-            else
-                creatures.add(new Hero(initHeroX, initHeroY, initHeroHP, initMaxHeroHP));
-            setOnTile(initHeroX, initHeroY, true);
-            for (int i = 1; i < identities.size(); i++) {
-                if (identities.get(i) == 1) {
-                    creatures.add(new Goblin(valueX.get(i), valueY.get(i)));
-                    setOnTile(valueX.get(i), valueY.get(i), true);
-                }
-                if (identities.get(i) == 2) {
-                    creatures.add(new Archer(valueX.get(i), valueY.get(i)));
-                    setOnTile(valueX.get(i), valueY.get(i), true);
-                }
-                if (identities.get(i) == 3) {
-                    creatures.add(new Mage(valueX.get(i), valueY.get(i)));
-                    setOnTile(valueX.get(i), valueY.get(i), true);
-                }
-            }
-        } else {
-            for (int i = 0; i < numSqW; i++) {
-                for (int j = 0; j < numSqH; j++) {
-                    setOnTile(i, j, false);
-                }
-            }
+    private void init() {
+        for (Creature c :
+                creatures) {
+            setOnTile(c.getX(), c.getY(), false);
         }
         heroC = creatures.get(0);
         square = BitmapFactory.decodeResource(context.getResources(), R.drawable.square);
@@ -115,26 +96,13 @@ class DrawThread extends Thread {
         banned_square = BitmapFactory.decodeResource(context.getResources(), R.drawable.banned_square);
         archer = BitmapFactory.decodeResource(context.getResources(), R.drawable.archer);
         mage = BitmapFactory.decodeResource(context.getResources(), R.drawable.mage);
-        saveGame(context, level, creatures);
     }
 
-    public void saveGame(Context context, int level, ArrayList<Creature> creatures) {
-        Save.createSave(context, level, creatures);
-       /* try {
-            Log.i("dan", "DrawThread getSave: " + Save.getSave(context));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+    public void saveGame(Context context, int level, int turn, ArrayList<Creature> creatures) {
+        DatabaseCreatures.createSave(creatures, dbCreatures);
+        DatabaseLevel.createSave(level, turn, dbLevel);
     }
 
-    DrawThread(SurfaceHolder surfaceHolder, Context context, int HeroHP, int initMaxHeroHP, ArrayList<Integer> identities, ArrayList<Integer> valueX, ArrayList<Integer> valueY, int level) {
-        this.surfaceHolder = surfaceHolder;
-        initHeroHP = HeroHP;
-        this.initMaxHeroHP = initMaxHeroHP;
-        this.context = context;
-        this.level = level;
-        init(identities, valueX, valueY);
-    }
 
     void setPaintSuggestingMoveSquare(boolean painting) {
         paintSuggestingMoveSquare = painting;
@@ -211,7 +179,7 @@ class DrawThread extends Thread {
                     }
                     case 1: {
                         //exit to menu
-                        saveGame(context, level, creatures);
+                        saveGame(context, level, turn, creatures);
                         LevelActivity myActivity = (LevelActivity) context;
                         myActivity.finish();
                         break;
@@ -224,21 +192,19 @@ class DrawThread extends Thread {
     }
 
     private void stairsPainting(Canvas canvas) {
+        checkIfAllAreDead();
         if (allEnemiesDead) {
-            int stairsX = (numSqW - 1) / 2;
-            int stairsY = 1;
             float currX = squares[stairsY][stairsX].getX();
             float currY = squares[stairsY][stairsX].getY();
             canvas.drawBitmap(stairs, currX, currY, null);
-            if (heroC.getX() == stairsX & heroC.getY() == stairsY) {
-                wonGame();
+            if (atStairs()) {
+                endGame(true);
             }
         }
     }
 
-    private void wonGame() {
-        //TODO need smth here
-        setRunning(false);
+    public boolean atStairs() {
+        return (heroC.getX() == stairsX && heroC.getY() == stairsY);
     }
 
     private void HPPainting(Canvas canvas) {
@@ -247,7 +213,7 @@ class DrawThread extends Thread {
         Paint p = new Paint();
         p.setColor(Color.RED);
         p.setTextSize(HPsizeText);
-        String text = "HP " + heroC.getCurrentHP() + "/" + heroC.getHP();
+        String text = "HP " + heroC.getCurrentHP() + "/" + heroC.getMaxHP();
         canvas.drawText(text, w, h, p);
     }
 
@@ -289,6 +255,8 @@ class DrawThread extends Thread {
     private void setCanvasProps(Canvas canvas) {
         canvasW = canvas.getWidth();
         canvasH = canvas.getHeight();
+        HPsizeText = canvasH / SCALE_FOR_TEXT;
+        LEVELsizeText = canvasH / SCALE_FOR_TEXT;
     }
 
     private void setSquareMap(Canvas canvas) {
@@ -310,8 +278,10 @@ class DrawThread extends Thread {
     }
 
     private void suggestMove(Canvas canvas) {
-        if (paintSuggestingMoveSquare & neighboringTiles(paintingSuggestingMoveSquareX, paintingSuggestingMoveSquareY)) {
-            if (paintingSuggestingMoveSquareX != -1 & paintingSuggestingMoveSquareY != -1) {
+     /*   Log.i("dan","paintingSuggestingMove "+paintingSuggestingMoveSquareX +" "+paintingSuggestingMoveSquareY+" paintSuggestingMoveSquare " +
+                paintSuggestingMoveSquare);*/
+        if (paintSuggestingMoveSquare && neighboringTiles(paintingSuggestingMoveSquareX, paintingSuggestingMoveSquareY)) {
+            if (paintingSuggestingMoveSquareX != -1 && paintingSuggestingMoveSquareY != -1) {
                 Bitmap current;
                 if (!onTile[paintingSuggestingMoveSquareY][paintingSuggestingMoveSquareX]) {
                     current = suggestingSquare;
@@ -327,22 +297,19 @@ class DrawThread extends Thread {
 
 
     boolean neighboringTiles(int x, int y) {
-        if (Math.abs(x - heroC.getX()) <= possibleMovement & Math.abs(y - heroC.getY()) <= possibleMovement) {
+        if (Math.abs(x - heroC.getX()) <= possibleMovement && Math.abs(y - heroC.getY()) <= possibleMovement) {
             return true;
         } else
             return false;
     }
 
-    Square[][] getSquares() {
-        return squares;
-    }
 
     int[] getSquareNum(double x, double y) {
         for (int i = 0; i < numSqH; i++) {
             for (int j = 0; j < numSqW; j++) {
                 // Log.i("dan", "CHECKING: " + i + " " + squares[i][j].getX() + " " + j + " " + squares[i][j].getY());
-                if ((x > squares[i][j].getX() & x < squares[i][j].getX() + square.getWidth()) &
-                        (y > squares[i][j].getY() & y < squares[i][j].getY() + square.getHeight())) {
+                if ((x > squares[i][j].getX() && x < squares[i][j].getX() + square.getWidth()) &&
+                        (y > squares[i][j].getY() && y < squares[i][j].getY() + square.getHeight())) {
                     //Log.i("dan", "OKAY: " + i + " " + j);
                     return new int[]{j, i};  //[0]=x; [1]=y;
                 }
@@ -378,8 +345,15 @@ class DrawThread extends Thread {
         paintSquare(-1, -1);
         checkHeroHarrasing();
         checkEnemyDeath();
+        addTurn();
         enemyTurn();
-        saveGame(context, level, creatures);
+        saveGame(context, level, turn, creatures);
+    }
+
+    private void addTurn() {
+        turn++;
+        DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatTurn());
+        DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getTURN());
     }
 
     private void setLastXYArray(Creature c) {
@@ -396,7 +370,7 @@ class DrawThread extends Thread {
         settingXY9Array(c.getX(), c.getY(), tempX, tempY);
         int now = 4;
         for (int i = 0; i < 9; i++) {
-            if (x - c.getX() == tempX[i] - tempX[now] & y - c.getY() == tempY[i] - tempY[now]) {
+            if (x - c.getX() == tempX[i] - tempX[now] && y - c.getY() == tempY[i] - tempY[now]) {
                 c.setVector(i);
                 break;
             }
@@ -410,17 +384,17 @@ class DrawThread extends Thread {
         //check vector killing
         for (Creature enemy : creatures) {
             if (enemy.getIdentity() != 0)
-                if (tempX[heroC.getVector()] == enemy.getX() & tempY[heroC.getVector()] == enemy.getY()) {
+                if (tempX[heroC.getVector()] == enemy.getX() && tempY[heroC.getVector()] == enemy.getY()) {
                     enemy.setCurrentHP(enemy.getCurrentHP() - 1);
                 }
         }
         //another
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                if (tempX[i] == heroC.getLastX()[j] & tempY[i] == heroC.getLastY()[j])
+                if (tempX[i] == heroC.getLastX()[j] && tempY[i] == heroC.getLastY()[j])
                     for (Creature enemy : creatures) {
                         if (enemy.getIdentity() != 0)
-                            if (tempX[i] == enemy.getX() & tempY[i] == enemy.getY()) {
+                            if (tempX[i] == enemy.getX() && tempY[i] == enemy.getY()) {
                                 enemy.setCurrentHP(enemy.getCurrentHP() - 1);
                             }
                     }
@@ -432,13 +406,35 @@ class DrawThread extends Thread {
     private void checkEnemyDeath() {
         for (Creature enemy : creatures) {
             if (enemy.getIdentity() != 0) {
-                if (enemy.getCurrentHP() <= 0 & enemy.getAlive()) {
+                if (enemy.getCurrentHP() <= 0 && enemy.getAlive()) {
                     setOnTile(enemy.getX(), enemy.getY(), false);
                     enemy.setAlive(false);
+                    saveCounterOFEnemies(enemy);
                 }
             }
         }
         checkIfAllAreDead();
+    }
+
+    private void saveCounterOFEnemies(Creature enemy) {
+        switch (enemy.getIdentity()) {
+            case 1: {
+                DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatGoblins());
+                DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getGOBLINS());
+                break;
+            }
+            case 2: {
+                DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatArchers());
+                DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getARCHERS());
+                break;
+            }
+            case 3: {
+                DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatMages());
+                DatabaseLevel.incrementInfo(dbLevel, DatabaseLevel.getMAGES());
+                break;
+            }
+        }
+
     }
 
     private void enemyTurn() {
@@ -459,7 +455,7 @@ class DrawThread extends Thread {
         int dist = (tempX[4] - x) * (tempX[4] - x) + (tempY[4] - y) * (tempY[4] - y);
         int min = 4;
         for (int i = 0; i < 9; i++) {
-            if (tempX[i] == -1 | tempY[i] == -1)
+            if (tempX[i] == -1 || tempY[i] == -1)
                 continue;
             if (onTile[tempY[i]][tempX[i]])
                 continue;
@@ -471,12 +467,12 @@ class DrawThread extends Thread {
         }
         for (Creature c :
                 creatures) {
-            if (tempX[min] == c.getX() & tempY[min] == c.getY())
+            if (tempX[min] == c.getX() && tempY[min] == c.getY())
                 min = 4;
         }
 
         for (int i = 8; i > -1; i--) {
-            if (tempX[i] == -1 | tempY[i] == -1)
+            if (tempX[i] == -1 || tempY[i] == -1)
                 continue;
             if (onTile[tempY[i]][tempX[i]])
                 continue;
@@ -489,7 +485,7 @@ class DrawThread extends Thread {
 
         for (Creature c :
                 creatures) {
-            if (tempX[min] == c.getX() & tempY[min] == c.getY())
+            if (tempX[min] == c.getX() && tempY[min] == c.getY())
                 min = 4;
         }
         return min;
@@ -538,7 +534,7 @@ class DrawThread extends Thread {
             for (int i = 0; i < numSqH; i++) {
                 for (int j = 0; j < numSqW; j++) {
                     if (!onTile[i][j]) {
-                        if (i == y | j == x) {
+                        if (i == y || j == x) {
                             neededSquareX.add(j);
                             neededSquareY.add(i);
                         }
@@ -649,14 +645,14 @@ class DrawThread extends Thread {
         settingXY9Array(g.getX(), g.getY(), tempX, tempY);
         //check vector killing
 
-        /*if (tempX[g.getVector()] == heroC.getX() & tempY[g.getVector()] == heroC.getY()) { //too imbalanced
+        /*if (tempX[g.getVector()] == heroC.getX() && tempY[g.getVector()] == heroC.getY()) { //too imbalanced
             decrementHerosHp();
         }*/
         //another
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                if (tempX[i] == g.getLastX()[j] & tempY[i] == g.getLastY()[j])
-                    if (tempX[i] == heroC.getX() & tempY[i] == heroC.getY()) {
+                if (tempX[i] == g.getLastX()[j] && tempY[i] == g.getLastY()[j])
+                    if (tempX[i] == heroC.getX() && tempY[i] == heroC.getY()) {
                         return true;
                     }
             }
@@ -666,7 +662,7 @@ class DrawThread extends Thread {
 
     private boolean canArcherHarrasing(Creature a) {
         //check x and y of hero
-        return heroC.getX() == a.getX() | heroC.getY() == a.getY();
+        return heroC.getX() == a.getX() || heroC.getY() == a.getY();
     }
 
     private boolean canMageHarrasing(Creature m) {
@@ -714,12 +710,12 @@ class DrawThread extends Thread {
     private void checkHerosDeath() {
         if (heroC.getCurrentHP() <= 0) {
             heroC.setAlive(false);
-            endGame();
+            endGame(false);
         }
 
     }
 
-    private void endGame() {
+    private void endGame(boolean won) {
         setRunning(false);
     }
 
@@ -740,7 +736,7 @@ class DrawThread extends Thread {
         arrX[7] = x;
         arrX[8] = x + 1;
         for (int i = 0; i < arrX.length; i++) {
-            if (arrX[i] >= numSqW | arrX[i] < 0 | arrY[i] < 0 | arrX[i] >= numSqH) {
+            if (arrX[i] >= numSqW || arrX[i] < 0 || arrY[i] < 0 || arrX[i] >= numSqH) {
                 arrX[i] = -1;
                 arrY[i] = -1;
             }
@@ -757,5 +753,9 @@ class DrawThread extends Thread {
 
     public int getLevel() {
         return level;
+    }
+
+    public int getTurn() {
+        return turn;
     }
 }

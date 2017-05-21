@@ -8,15 +8,17 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.Toast;
 
-import com.pyroarsonistapps.subterraneandescent.Logic.Creatures.Creature;
-import com.pyroarsonistapps.subterraneandescent.Logic.Square;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
+import com.pyroarsonistapps.subterraneandescent.Logic.Creature;
 
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static com.pyroarsonistapps.subterraneandescent.Save.LEVELSAVEFILE;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbCreatures;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbLevel;
+import static com.pyroarsonistapps.subterraneandescent.Core.MainActivity.dbStatistics;
 
 
 class DrawView extends SurfaceView implements SurfaceHolder.Callback {
@@ -24,15 +26,12 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private ArrayList<Creature> creatures;
     protected DrawThread drawThread;
     private int level;
+    private int turn;
     private int heroHP;
     private int initMaxHeroHP;
 
     private double targetX, targetY;
 
-    private Square[][] squares;
-    private ArrayList<Integer> identities = new ArrayList<>();
-    public ArrayList<Integer> valueX = new ArrayList<>();//squares
-    public ArrayList<Integer> valueY = new ArrayList<>();
     private int numSqH = 9;
     private int numSqW = 7;
     private boolean[][] availableToGenerate = new boolean[numSqH][numSqW];
@@ -40,23 +39,26 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     private boolean needGenerate = true;
 
-    private  final int MAXLEVEL = 5;
+    private final int MAXLEVEL = 10;
 
     private boolean won;
 
 
-    public DrawView(Context context, int level, int heroHP, int initMaxHeroHP) {
+    public DrawView(Context context, int level, int turn, int heroHP, int initMaxHeroHP) {
         super(context);
         this.level = level;
         this.heroHP = heroHP;
         this.initMaxHeroHP = initMaxHeroHP;
         needGenerate = true;
+        this.turn = turn;
+        creatures = new ArrayList<>();
         getHolder().addCallback(this);
     }
 
-    public DrawView(Context context, int level, ArrayList<Creature> creatures) {
+    public DrawView(Context context, int level, int turn, ArrayList<Creature> creatures) {
         super(context);
         this.level = level;
+        this.turn = turn;
         needGenerate = false;
         this.creatures = creatures;
         getHolder().addCallback(this);
@@ -71,21 +73,22 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         if (needGenerate) {
-            initCreature(0, -1, -1);
+            initHero();
             generateMap(level);
-            drawThread = new DrawThread(getHolder(), getContext(), heroHP, initMaxHeroHP, identities, valueX, valueY, level);
-        } else {
-            drawThread = new DrawThread(getHolder(), getContext(), level, creatures, needGenerate);
         }
-        squares = drawThread.getSquares();
+        drawThread = new DrawThread(getHolder(), getContext(), level, turn, creatures, needGenerate);
         drawThread.setRunning(true);
         drawThread.start();
     }
 
+    private void initHero() {
+        Creature hero = new Creature(DrawThread.initHeroX, DrawThread.initHeroY, heroHP, initMaxHeroHP, 0);
+        creatures.add(hero);
+    }
+
     private void initCreature(int identity, int x, int y) {
-        identities.add(identity);
-        valueX.add(x);
-        valueY.add(y);
+        Creature c = new Creature(x, y, 1, 1, identity);
+        creatures.add(c);
     }
 
     private void generateCreature(int identity, int num) {
@@ -135,6 +138,36 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
                 generateCreature(3, 1);
                 break;
             }
+            case 6: {
+                generateCreature(1, 3);
+                generateCreature(2, 2);
+                generateCreature(3, 2);
+                break;
+            }
+            case 7: {
+                generateCreature(1, 4);
+                generateCreature(2, 2);
+                generateCreature(3, 2);
+                break;
+            }
+            case 8: {
+                generateCreature(1, 4);
+                generateCreature(2, 3);
+                generateCreature(3, 2);
+                break;
+            }
+            case 9: {
+                generateCreature(1, 5);
+                generateCreature(2, 3);
+                generateCreature(3, 2);
+                break;
+            }
+            case 10: {
+                generateCreature(1, 5);
+                generateCreature(2, 3);
+                generateCreature(3, 3);
+                break;
+            }
 //CARE!
 
         }
@@ -157,23 +190,17 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        //checking end of the game
-
-        checkGameEnd();
-
         int action = event.getAction();
 
         if (action == MotionEvent.ACTION_DOWN) {
             targetX = event.getX();
             targetY = event.getY();
             // Log.i("dan", "dot: " + targetX + " " + targetY);
-            //drawing = true;
-            //xy[0]=x square xy[1]=y;
             int[] xy = drawThread.getSquareNum(targetX, targetY);
 
             if (xy != null) {
                 //Toast.makeText(this.getContext(), xy[0] + " " + xy[1], Toast.LENGTH_SHORT).show();
-                if (drawThread.getPaintingSuggestingMoveSquareX() == xy[0] & drawThread.getPaintingSuggestingMoveSquareY() == xy[1] & drawThread.neighboringTiles(xy[0], xy[1])) {
+                if (drawThread.getPaintingSuggestingMoveSquareX() == xy[0] && drawThread.getPaintingSuggestingMoveSquareY() == xy[1] && drawThread.neighboringTiles(xy[0], xy[1])) {
                     if (!drawThread.getOnTile()[drawThread.getPaintingSuggestingMoveSquareY()][drawThread.getPaintingSuggestingMoveSquareX()])
                         //!drawThread.getBanned()
                         drawThread.moveHero(drawThread.getPaintingSuggestingMoveSquareX(), drawThread.getPaintingSuggestingMoveSquareY());
@@ -188,37 +215,39 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             drawThread.setPaintSuggestingMoveSquare(true);
             drawThread.setRepaint(true);
         }
+        //checking end of the game
+        checkGameEnd();
 
         return true;
     }
 
     private void checkGameEnd() {
-        if (!drawThread.isAlive() & continued)
+        if ((drawThread.getAllEnemiesDead() && drawThread.atStairs() && continued)||!drawThread.getCreatures().get(0).getAlive())
             end(drawThread.getAllEnemiesDead());
     }
 
     public void end(boolean allEnemiesDead) {
         continued = false;
-        drawThread.saveGame(getContext(), drawThread.getLevel(), drawThread.getCreatures());
+        drawThread.saveGame(getContext(), drawThread.getLevel(), drawThread.getTurn(), drawThread.getCreatures());
         won = allEnemiesDead;
         if (won) {
             level = drawThread.getLevel();
             Log.i("dan", "WON LEVEL num " + level);
+            saveCounterOfWinnedLevels();
             if (level == MAXLEVEL) {
                 Toast.makeText(this.getContext(), "You won! Congrats!", Toast.LENGTH_SHORT).show();
-                String filename = LEVELSAVEFILE;
-                File file = new File(getContext().getFilesDir(), filename);
-                if (file.exists())
-                    file.delete();
+                DatabaseCreatures.deleteTable(dbCreatures);
+               // DatabaseLevel.deleteTable(dbLevel);
             } else {
                 creatures = drawThread.getCreatures();
                 Creature hero = creatures.get(0);
                 heroHP = hero.getCurrentHP();
-                initMaxHeroHP = hero.getHP();
+                initMaxHeroHP = hero.getMaxHP();
             }
         } else {
             Log.i("dan", "LOST LEVEL");
             Toast.makeText(this.getContext(), "You lost...", Toast.LENGTH_SHORT).show();
+            DatabaseCreatures.deleteTable(dbCreatures);
         }
         try {
             drawThread.join();
@@ -226,7 +255,11 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
             e.printStackTrace();
         }
         LevelActivity myActivity = (LevelActivity) getContext();
-        myActivity.finish();
+        myActivity.end();
+    }
+
+    private void saveCounterOfWinnedLevels() {
+        DatabaseStatistics.incrementInfo(dbStatistics, DatabaseStatistics.getStatWinnedLevels());
     }
 
     public boolean getWon() {
@@ -245,7 +278,7 @@ class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         return initMaxHeroHP;
     }
 
-    public  int getMAXLEVEL() {
+    public int getMAXLEVEL() {
         return MAXLEVEL;
     }
 }

@@ -12,4 +12,8 @@
     <string name="pause_continue">Continue</string>
     <string name="pause_exit">Exit to main menu</string>
     <string name="loading">Loading</string>
+
+    <string name="gifts_alert">After the battle you learned a little how to survive in subterranean.</string>
+    <string name="gifts_restore">Restore all HP</string>
+    <string name="gifts_increment_hp">Obtain +1 to max HP</string>
 </resources>

@@ -1,22 +1,25 @@
-package com.pyroarsonistapps.subterraneandescent.Logic.Creatures;
+package com.pyroarsonistapps.subterraneandescent.Logic;
 
 public class Creature {
     protected int identity;
-    protected int HP;
+    protected int maxHP;
     protected int currentHP;
 
     protected int x; //on squares
     protected int y;
 
     protected int vector = 4;
-    protected int[] lastX = new int[9];
+    protected int[] lastX = new int[9]; // 0123456789 (real values) and - for null value
     protected int[] lastY = new int[9];
 
     protected boolean isAlive = true;
 
-    public Creature(int x, int y) {
+    public Creature(int x, int y, int currentHP, int maxHP, int identity) {
         this.x = x;
         this.y = y;
+        this.currentHP = currentHP;
+        this.maxHP = maxHP;
+        this.identity = identity;
     }
 
 
@@ -24,13 +27,25 @@ public class Creature {
 
     }
 
+    public Creature(int identity, int currentHP, int maxHP, int x, int y, int vector, String lastX, String lastY, int isAlive) {
+        this.identity = identity;
+        this.currentHP = currentHP;
+        this.maxHP = maxHP;
+        this.x = x;
+        this.y = y;
+        this.vector = vector;
+        this.lastX = setLast(lastX);
+        this.lastY = setLast(lastY);
+        this.isAlive = (isAlive == 1);
+    }
+
 
     public int getCurrentHP() {
         return currentHP;
     }
 
-    public int getHP() {
-        return HP;
+    public int getMaxHP() {
+        return maxHP;
     }
 
     public int getX() {
@@ -45,8 +60,8 @@ public class Creature {
         this.currentHP = currentHP;
     }
 
-    public void setHP(int HP) {
-        this.HP = HP;
+    public void setMaxHP(int maxHP) {
+        this.maxHP = maxHP;
     }
 
     public void setX(int x) {
@@ -94,20 +109,15 @@ public class Creature {
     }
 
 
-    public void setLastX(int lastX) {
+    public int[] setLast(String last) {
         int[] arr = new int[9];
         for (int i = 0; i < arr.length; i++) {
-            arr[i] = Integer.parseInt(String.valueOf(String.valueOf(lastX).indexOf(i)));
+            if (last.indexOf(i) == -1)
+                arr[i] = -1;
+            else
+                arr[i] = Integer.parseInt(String.valueOf(String.valueOf(last).indexOf(i)));
         }
-        setLastX(arr);
-    }
-
-    public void setLastY(int lastY) {
-        int[] arr = new int[9];
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] = Integer.parseInt(String.valueOf(String.valueOf(lastY).indexOf(i)));
-        }
-        setLastY(arr);
+        return arr;
     }
 
     public void setIdentity(int identity) {

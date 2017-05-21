@@ -5,24 +5,49 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseCreatures;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseLevel;
+import com.pyroarsonistapps.subterraneandescent.Database.DatabaseStatistics;
 import com.pyroarsonistapps.subterraneandescent.R;
 
 import java.io.File;
 
-import static com.pyroarsonistapps.subterraneandescent.Save.LEVELSAVEFILE;
-
 public class MainActivity extends Activity {
     AlertDialog.Builder continueGameOrNot;
+    protected static DatabaseCreatures creaturesOpen;
+    protected static DatabaseLevel saveLevel;
+    protected static DatabaseStatistics statisticsOpen;
+    protected static SQLiteDatabase dbCreatures, dbLevel, dbStatistics;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initDB();
         setContentView(R.layout.activity_main);
+    }
+
+    private void initDB() {
+        creaturesOpen = new DatabaseCreatures(getApplicationContext(), DatabaseCreatures.getTableNameCreatures(), null, DatabaseCreatures.getDatabaseVersion());
+        saveLevel = new DatabaseLevel(getApplicationContext(), DatabaseLevel.getTableNameLevel(), null, DatabaseLevel.getDatabaseVersion());
+        statisticsOpen = new DatabaseStatistics(getApplicationContext(), DatabaseStatistics.getTableNameStat(), null, DatabaseStatistics.getDatabaseVersion());
+
+        try {
+            dbCreatures = creaturesOpen.getWritableDatabase();
+            dbLevel = saveLevel.getWritableDatabase();
+            dbStatistics = statisticsOpen.getWritableDatabase();
+        } catch (SQLiteException ex) {
+            dbCreatures = creaturesOpen.getReadableDatabase();
+            dbLevel = saveLevel.getReadableDatabase();
+            dbStatistics = statisticsOpen.getReadableDatabase();
+        }
     }
 
     private void init() {
@@ -37,7 +62,6 @@ public class MainActivity extends Activity {
                 if (canContinue)
                     continueGameOrNot.show();
                 else
-                    //createSave(MainActivity.this, 0, null);  //TODO use if else statement later to check if save exists
                     startLevelActivity(true);
             }
 
@@ -54,22 +78,22 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-         init();
+        init();
     }
 
     private void startLevelActivity(boolean startNewGame) {
         Intent myIntent = new Intent(MainActivity.this, LoadingScreen.class);
-        myIntent.putExtra("needToGetSave", !startNewGame);
+        myIntent.putExtra("isNewLevel", startNewGame);
         MainActivity.this.startActivity(myIntent);
     }
 
     private void setDialog() {
-        String message = getResources().getString(R.string.question_alert);
-        String yesString = getResources().getString(R.string.start_new_game_answer);
-        String noString = getResources().getString(R.string.continue_answer);
+        final String message = getResources().getString(R.string.question_alert);
+        final String yesString = getResources().getString(R.string.start_new_game_answer);
+        final String noString = getResources().getString(R.string.continue_answer);
 
         continueGameOrNot = new AlertDialog.Builder(this);
-        continueGameOrNot.setMessage(message); // сообщение
+        continueGameOrNot.setMessage(message);
         continueGameOrNot.setPositiveButton(yesString, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int arg1) {
                 startLevelActivity(true);
@@ -88,9 +112,8 @@ public class MainActivity extends Activity {
     }
 
     private boolean checkExistingOfSaveFile() {
-        File f = new File(getApplicationContext().getFilesDir(), LEVELSAVEFILE);
-        // Log.i("dan", "checkExistingOfSaveFile: " + f.exists());
-        return f.exists();
+        //Log.i("dan", "" + DatabaseCreatures.saveExists(dbCreatures));
+        return DatabaseCreatures.saveExists(dbCreatures);
     }
 
     @Override
@@ -98,4 +121,6 @@ public class MainActivity extends Activity {
         super.onDestroy();
         System.exit(0);
     }
+
+
 }
